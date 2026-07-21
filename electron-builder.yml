@@ -1,0 +1,11 @@
+appId: com.wakfucompanion.app
+productName: Wakfu Companion
+directories:
+  output: release
+files:
+  - dist/**/*
+win:
+  target: nsis
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true

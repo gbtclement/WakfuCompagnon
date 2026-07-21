@@ -1,0 +1,36 @@
+{
+  "name": "wakfu-companion",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "main": "dist/main/main.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "dev:renderer": "vite",
+    "build:renderer": "vite build",
+    "build:main": "tsc -p tsconfig.main.json",
+    "build": "npm run build:renderer && npm run build:main",
+    "test": "vitest run",
+    "package": "npm run build && electron-builder"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.8",
+    "electron": "^43.1.1",
+    "electron-builder": "^26.15.3",
+    "typescript": "^7.0.2",
+    "vite": "^8.1.5",
+    "vitest": "^4.1.10",
+    "vue-tsc": "^3.3.7"
+  },
+  "dependencies": {
+    "electron-store": "^11.0.2",
+    "pinia": "^4.0.2",
+    "vue": "^3.5.40",
+    "vue-router": "^5.2.0"
+  }
+}
