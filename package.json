@@ -3,9 +3,7 @@
   "version": "1.0.0",
   "type": "commonjs",
   "main": "dist/main/main.js",
-  "directories": {
-    "doc": "docs"
-  },
+  "description": "Compagnon de bureau pour Wakfu : detection de serveur, suivi de quetes environnementales et timers d'archimonstres via lecture locale du log du jeu.",
   "scripts": {
     "dev:renderer": "vite",
     "build:renderer": "vite build",
@@ -17,7 +15,6 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.8",
     "electron": "^43.1.1",
