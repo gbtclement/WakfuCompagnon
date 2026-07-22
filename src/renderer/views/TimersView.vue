@@ -20,8 +20,22 @@
     <div class="panel">
       <h2 class="h2">Créer un timer</h2>
       <form class="timer-form" @submit.prevent="submit">
-        <input v-model="name" class="field" placeholder="Nom de l'archimonstre" required />
-        <input v-model.number="minutes" type="number" min="1" placeholder="min" class="minutes-field" required />
+        <select v-model="selectedArchimonsterId" class="field" @change="onArchimonsterSelected">
+          <option value="">Saisie manuelle…</option>
+          <option v-for="mob in admin.config.archimonsters" :key="mob.id" :value="mob.id">
+            {{ mob.name }} ({{ mob.respawnMinutes }} min)
+          </option>
+        </select>
+        <input v-model="name" class="field" placeholder="Nom du timer" required />
+        <input
+          v-model.number="minutes"
+          type="number"
+          min="1"
+          placeholder="min"
+          class="minutes-field"
+          :readonly="selectedArchimonsterId !== ''"
+          required
+        />
         <button type="submit" class="primary-btn">Lancer</button>
       </form>
     </div>
@@ -31,16 +45,30 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useAppStore } from '../stores/appState'
+import { useAdminStore } from '../stores/admin'
 import type { TimerRecord } from '../../main/store'
 
 const store = useAppStore()
+const admin = useAdminStore()
+
+const selectedArchimonsterId = ref('')
 const name = ref('')
 const minutes = ref(1)
+
+function onArchimonsterSelected(): void {
+  if (selectedArchimonsterId.value === '') return
+  const mob = admin.config.archimonsters.find((a) => a.id === selectedArchimonsterId.value)
+  if (mob) {
+    name.value = mob.name
+    minutes.value = mob.respawnMinutes
+  }
+}
 
 function submit(): void {
   store.createTimer(name.value, minutes.value * 60_000)
   name.value = ''
   minutes.value = 1
+  selectedArchimonsterId.value = ''
 }
 
 function remainingMs(timer: TimerRecord): number {
@@ -181,10 +209,12 @@ function ringStyle(timer: { remainingMs: number; durationMs: number }): Record<s
   display: flex;
   gap: 10px;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .field {
   flex: 1;
+  min-width: 160px;
 }
 
 .minutes-field {
