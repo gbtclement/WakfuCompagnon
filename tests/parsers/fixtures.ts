@@ -3,12 +3,6 @@ export const SERVER_CONNECTION_LINES = {
   ogrest: ' INFO 18:26:49,060 [AWT-EventQueue-0] (aVj:62) - Connexion au proxy :wakfu-ogrest.ankama-games.com:5556 / ssl : true'
 }
 
-export const ENVIRONMENTAL_QUEST_LINES = {
-  active1123: ' INFO 20:05:41,377 [AWT-EventQueue-0] (chJ:254) - Challenge courant : -1123 (dans 0s)',
-  active1134: ' INFO 20:05:46,312 [AWT-EventQueue-0] (chJ:254) - Challenge courant : -1134 (dans 0s)',
-  none: ' INFO 20:07:15,962 [AWT-EventQueue-0] (chJ:254) - Challenge courant : -1 (dans 0s)'
-}
-
 export const QUEST_COMPLETED_LINES = {
   won: ' INFO 18:22:57,585 [AWT-EventQueue-0] (aPV:174) - [Information (jeu)] Vous venez de remporter la quête "Course : Salbatroce Voyageur"',
   failed: ' INFO 20:05:36,472 [AWT-EventQueue-0] (aPV:174) - [Information (jeu)] Quête échouée: "Collaboratif : Hordes de Vandaliénés"'

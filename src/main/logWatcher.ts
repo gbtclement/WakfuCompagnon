@@ -2,13 +2,11 @@ import { EventEmitter } from 'events'
 import { openSync, closeSync, readSync, statSync, existsSync } from 'fs'
 import { LineParser, WakfuEvent } from './parsers/types'
 import { parseServerConnection } from './parsers/serverConnection'
-import { parseEnvironmentalQuest } from './parsers/environmentalQuest'
 import { parseQuestCompleted } from './parsers/questCompleted'
 import { parseAchievement } from './parsers/achievement'
 
 const PARSERS: LineParser[] = [
   parseServerConnection,
-  parseEnvironmentalQuest,
   parseQuestCompleted,
   parseAchievement
 ]
