@@ -1,12 +1,13 @@
+import { randomUUID } from 'crypto'
 import { ipcMain, dialog, BrowserWindow } from 'electron'
 import { AppStore } from './store'
 import { LogWatcher } from './logWatcher'
 import { TimerManager } from './timers'
 import { notify } from './notifications'
-import environmentalQuests from './data/environmentalQuests.json'
 
-function questName(id: number): string {
-  return (environmentalQuests as Record<string, string>)[String(id)] ?? `Quête #${id}`
+function questName(store: AppStore, id: number): string {
+  const quest = store.getConfig().environmentalQuests.find((q) => q.id === id)
+  return quest?.name ?? `Quête #${id}`
 }
 
 export function registerIpcHandlers(
@@ -52,6 +53,51 @@ export function registerIpcHandlers(
     return path
   })
 
+  ipcMain.handle('add-environmental-quest', (_event, id: number, name: string) => {
+    store.addEnvironmentalQuest({ id, name })
+    return store.getConfig()
+  })
+
+  ipcMain.handle('update-environmental-quest', (_event, id: number, name: string) => {
+    store.updateEnvironmentalQuest(id, name)
+    return store.getConfig()
+  })
+
+  ipcMain.handle('remove-environmental-quest', (_event, id: number) => {
+    store.removeEnvironmentalQuest(id)
+    return store.getConfig()
+  })
+
+  ipcMain.handle('add-archimonster', (_event, name: string, respawnMinutes: number) => {
+    store.addArchimonster({ id: randomUUID(), name, respawnMinutes })
+    return store.getConfig()
+  })
+
+  ipcMain.handle('update-archimonster', (_event, id: string, name: string, respawnMinutes: number) => {
+    store.updateArchimonster(id, name, respawnMinutes)
+    return store.getConfig()
+  })
+
+  ipcMain.handle('remove-archimonster', (_event, id: string) => {
+    store.removeArchimonster(id)
+    return store.getConfig()
+  })
+
+  ipcMain.handle('add-exploit', (_event, name: string, questIds: number[], archimonsterIds: string[]) => {
+    store.addExploit({ id: randomUUID(), name, questIds, archimonsterIds })
+    return store.getConfig()
+  })
+
+  ipcMain.handle('update-exploit', (_event, id: string, name: string, questIds: number[], archimonsterIds: string[]) => {
+    store.updateExploit(id, name, questIds, archimonsterIds)
+    return store.getConfig()
+  })
+
+  ipcMain.handle('remove-exploit', (_event, id: string) => {
+    store.removeExploit(id)
+    return store.getConfig()
+  })
+
   watcher.on('wakfu-event', (event) => {
     store.appendHistoryEvent(event)
     getWindow()?.webContents.send('wakfu-event-pushed', event)
@@ -59,7 +105,7 @@ export function registerIpcHandlers(
     if (event.type === 'environmental-quest' && event.challengeId !== -1) {
       const followed = store.getConfig().followedQuestIds
       if (followed.includes(event.challengeId)) {
-        notify('Quête environnementale rencontrée', questName(event.challengeId))
+        notify('Quête environnementale rencontrée', questName(store, event.challengeId))
       }
     }
 

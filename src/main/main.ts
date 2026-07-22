@@ -39,6 +39,13 @@ app.whenReady().then(() => {
 
   const store = new AppStore()
 
+  if (store.getConfig().environmentalQuests.length === 0) {
+    const staticQuests = require('./data/environmentalQuests.json') as Record<string, string>
+    for (const [id, name] of Object.entries(staticQuests)) {
+      store.addEnvironmentalQuest({ id: Number(id), name })
+    }
+  }
+
   const configuredPath = store.getConfig().logPath ?? detectDefaultLogPath((p) => existsSync(p))
   if (configuredPath && !store.getConfig().logPath) {
     store.setLogPath(configuredPath)
