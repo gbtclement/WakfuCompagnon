@@ -16,7 +16,25 @@ const api = {
   },
   onTimerExpired: (callback: (timer: TimerRecord) => void): void => {
     ipcRenderer.on('timer-expired', (_event, payload: TimerRecord) => callback(payload))
-  }
+  },
+  addEnvironmentalQuest: (id: number, name: string): Promise<AppConfig> =>
+    ipcRenderer.invoke('add-environmental-quest', id, name),
+  updateEnvironmentalQuest: (id: number, name: string): Promise<AppConfig> =>
+    ipcRenderer.invoke('update-environmental-quest', id, name),
+  removeEnvironmentalQuest: (id: number): Promise<AppConfig> =>
+    ipcRenderer.invoke('remove-environmental-quest', id),
+  addArchimonster: (name: string, respawnMinutes: number): Promise<AppConfig> =>
+    ipcRenderer.invoke('add-archimonster', name, respawnMinutes),
+  updateArchimonster: (id: string, name: string, respawnMinutes: number): Promise<AppConfig> =>
+    ipcRenderer.invoke('update-archimonster', id, name, respawnMinutes),
+  removeArchimonster: (id: string): Promise<AppConfig> =>
+    ipcRenderer.invoke('remove-archimonster', id),
+  addExploit: (name: string, questIds: number[], archimonsterIds: string[]): Promise<AppConfig> =>
+    ipcRenderer.invoke('add-exploit', name, questIds, archimonsterIds),
+  updateExploit: (id: string, name: string, questIds: number[], archimonsterIds: string[]): Promise<AppConfig> =>
+    ipcRenderer.invoke('update-exploit', id, name, questIds, archimonsterIds),
+  removeExploit: (id: string): Promise<AppConfig> =>
+    ipcRenderer.invoke('remove-exploit', id)
 }
 
 export type WakfuApi = typeof api
