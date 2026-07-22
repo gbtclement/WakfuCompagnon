@@ -22,7 +22,10 @@ describe('AppStore', () => {
       logPath: null,
       followedQuestIds: [],
       timers: [],
-      history: []
+      history: [],
+      environmentalQuests: [],
+      archimonsters: [],
+      exploits: []
     })
   })
 
@@ -50,5 +53,50 @@ describe('AppStore', () => {
     const event = { type: 'achievement' as const, achievementId: 1, timestamp: '00:00:00,000' }
     store.appendHistoryEvent(event)
     expect(store.getConfig().history).toEqual([event])
+  })
+
+  it('adds, updates, and removes an environmental quest', () => {
+    store.addEnvironmentalQuest({ id: -1123, name: 'Challenge #1123' })
+    expect(store.getConfig().environmentalQuests).toEqual([{ id: -1123, name: 'Challenge #1123' }])
+
+    store.updateEnvironmentalQuest(-1123, 'Les Silènes en Sommeil')
+    expect(store.getConfig().environmentalQuests).toEqual([{ id: -1123, name: 'Les Silènes en Sommeil' }])
+
+    store.removeEnvironmentalQuest(-1123)
+    expect(store.getConfig().environmentalQuests).toEqual([])
+  })
+
+  it('adds, updates, and removes an archimonster', () => {
+    store.addArchimonster({ id: 'a1', name: 'Comte Harebourg', respawnMinutes: 30 })
+    expect(store.getConfig().archimonsters).toEqual([{ id: 'a1', name: 'Comte Harebourg', respawnMinutes: 30 }])
+
+    store.updateArchimonster('a1', 'Comte Harebourg', 45)
+    expect(store.getConfig().archimonsters).toEqual([{ id: 'a1', name: 'Comte Harebourg', respawnMinutes: 45 }])
+
+    store.removeArchimonster('a1')
+    expect(store.getConfig().archimonsters).toEqual([])
+  })
+
+  it('adds, updates, and removes an exploit', () => {
+    store.addExploit({ id: 'e1', name: 'Maître des Silènes', questIds: [-1123], archimonsterIds: ['a1'] })
+    expect(store.getConfig().exploits).toEqual([{ id: 'e1', name: 'Maître des Silènes', questIds: [-1123], archimonsterIds: ['a1'] }])
+
+    store.updateExploit('e1', 'Maître des Silènes', [-1123, -1134], ['a1'])
+    expect(store.getConfig().exploits).toEqual([{ id: 'e1', name: 'Maître des Silènes', questIds: [-1123, -1134], archimonsterIds: ['a1'] }])
+
+    store.removeExploit('e1')
+    expect(store.getConfig().exploits).toEqual([])
+  })
+
+  it('removing an environmental quest strips it from exploits that reference it', () => {
+    store.addExploit({ id: 'e1', name: 'Maître des Silènes', questIds: [-1123, -1134], archimonsterIds: [] })
+    store.removeEnvironmentalQuest(-1123)
+    expect(store.getConfig().exploits).toEqual([{ id: 'e1', name: 'Maître des Silènes', questIds: [-1134], archimonsterIds: [] }])
+  })
+
+  it('removing an archimonster strips it from exploits that reference it', () => {
+    store.addExploit({ id: 'e1', name: 'Maître des Silènes', questIds: [], archimonsterIds: ['a1', 'a2'] })
+    store.removeArchimonster('a1')
+    expect(store.getConfig().exploits).toEqual([{ id: 'e1', name: 'Maître des Silènes', questIds: [], archimonsterIds: ['a2'] }])
   })
 })
