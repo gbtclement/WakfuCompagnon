@@ -9,9 +9,9 @@
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5" /><path d="M5.5 10v9.5h13V10" /><path d="M10 19.5v-6h4v6" /></svg>
       <span>Serveur</span>
     </RouterLink>
-    <RouterLink to="/quests" class="nav-link" active-class="nav-link-active">
+    <RouterLink to="/exploits" class="nav-link" active-class="nav-link-active">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5h10a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H8" /><path d="M6 3.5A2 2 0 0 0 4 5.5v13a2 2 0 0 0 2 2" /><path d="M8.5 8h6M8.5 11.5h6M8.5 15h4" /></svg>
-      <span>Quêtes</span>
+      <span>Exploits</span>
     </RouterLink>
     <RouterLink to="/timers" class="nav-link" active-class="nav-link-active">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8" /><path d="M12 9v4l3 2" /><path d="M9.5 2h5M12 2v2" /></svg>
@@ -24,6 +24,10 @@
     <RouterLink to="/settings" class="nav-link" active-class="nav-link-active">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3" /><path d="M12 3.5v2.2M12 18.3v2.2M4.6 7l1.9 1.1M17.5 15.9l1.9 1.1M4.6 17l1.9-1.1M17.5 8.1l1.9-1.1M3.5 12h2.2M18.3 12h2.2" /></svg>
       <span>Paramètres</span>
+    </RouterLink>
+    <RouterLink to="/admin" class="nav-link" active-class="nav-link-active">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5a1 1 0 0 1 1-1h9l6 6v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1Z" /><path d="M13 4v5h6" /><path d="M8.5 13h7M8.5 16.5h7" /></svg>
+      <span>Admin</span>
     </RouterLink>
 
     <div class="server-pill">

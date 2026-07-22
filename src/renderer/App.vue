@@ -15,9 +15,14 @@ import { onMounted } from 'vue'
 import NavBar from './components/NavBar.vue'
 import ToastStack from './components/ToastStack.vue'
 import { useAppStore } from './stores/appState'
+import { useAdminStore } from './stores/admin'
 
 const store = useAppStore()
-onMounted(() => store.load())
+const adminStore = useAdminStore()
+onMounted(() => {
+  store.load()
+  adminStore.load()
+})
 </script>
 
 <style scoped>
