@@ -2,11 +2,6 @@ import { defineStore } from 'pinia'
 import type { AppConfig, TimerRecord } from '../../main/store'
 import type { WakfuEvent } from '../../main/parsers/types'
 import { useToastStore } from './toasts'
-import environmentalQuests from '../../main/data/environmentalQuests.json'
-
-function questName(id: number): string {
-  return (environmentalQuests as Record<string, string>)[String(id)] ?? `Quête #${id}`
-}
 
 interface AppStateShape {
   config: AppConfig
@@ -15,7 +10,15 @@ interface AppStateShape {
 
 export const useAppStore = defineStore('app', {
   state: (): AppStateShape => ({
-    config: { logPath: null, followedQuestIds: [], timers: [], history: [] },
+    config: {
+      logPath: null,
+      followedQuestIds: [],
+      timers: [],
+      history: [],
+      environmentalQuests: [],
+      archimonsters: [],
+      exploits: []
+    },
     liveEvents: []
   }),
   actions: {
@@ -30,7 +33,8 @@ export const useAppStore = defineStore('app', {
           toastStore.push('info', 'Connecté au serveur', event.server)
         }
         if (event.type === 'environmental-quest' && event.challengeId !== -1 && this.config.followedQuestIds.includes(event.challengeId)) {
-          toastStore.push('success', 'Quête environnementale rencontrée', questName(event.challengeId))
+          const quest = this.config.environmentalQuests.find((q) => q.id === event.challengeId)
+          toastStore.push('success', 'Quête environnementale rencontrée', quest?.name ?? `Quête #${event.challengeId}`)
         }
         if (event.type === 'quest-completed') {
           toastStore.push('success', 'Quête remportée', event.questName)
