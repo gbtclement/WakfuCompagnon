@@ -1,0 +1,107 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Nunito+Sans:wght@400;600;700;800&display=swap');
+
+:root[data-theme='dark'] {
+  --bg: #100e0b;
+  --panel-bg: #171310;
+  --card-bg: #1d1813;
+  --card-bg-alt: #241d16;
+  --border: #3a2d1e;
+  --border-strong: #54402a;
+  --accent: #33e6bd;
+  --accent-soft: rgba(51, 230, 189, 0.16);
+  --gold: #e3ab4f;
+  --gold-soft: rgba(227, 171, 79, 0.16);
+  --text-primary: #ece2d0;
+  --text-secondary: #a49480;
+  --success: #33e6bd;
+  --warning: #e3ab4f;
+  --danger: #e2635a;
+  --on-accent: #1b140f;
+}
+
+:root[data-theme='light'] {
+  --bg: #efe1c2;
+  --panel-bg: #f8f0dc;
+  --card-bg: #fbf4e4;
+  --card-bg-alt: #f2e6cb;
+  --border: #d9c69c;
+  --border-strong: #b99f6c;
+  --accent: #0e9c82;
+  --accent-soft: rgba(14, 156, 130, 0.14);
+  --gold: #a9762c;
+  --gold-soft: rgba(169, 118, 44, 0.14);
+  --text-primary: #382a1a;
+  --text-secondary: #6f5c40;
+  --success: #0e9c82;
+  --warning: #a9762c;
+  --danger: #c14a3f;
+  --on-accent: #fff;
+}
+
+@keyframes glow-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 6px rgba(51, 230, 189, 0.45), 0 0 0 rgba(51, 230, 189, 0);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(51, 230, 189, 0.85), 0 0 4px rgba(51, 230, 189, 0.6);
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: 'Nunito Sans', sans-serif;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 6px;
+}
+
+h1,
+h2 {
+  font-family: 'Cinzel', serif;
+  margin: 0;
+}
+
+button {
+  font-family: 'Nunito Sans', sans-serif;
+}
+
+input,
+select {
+  font-family: 'Nunito Sans', sans-serif;
+  background: var(--card-bg);
+  border: 1.5px solid var(--border);
+  border-radius: 7px;
+  padding: 10px 13px;
+  font-size: 13.5px;
+  color: var(--text-primary);
+  outline: none;
+}

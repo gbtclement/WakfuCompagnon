@@ -5,6 +5,7 @@ export interface TimerRecord {
   id: string
   name: string
   endsAt: number
+  durationMs: number
 }
 
 export interface AppConfig {

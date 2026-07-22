@@ -49,7 +49,7 @@ describe('TimerManager', () => {
   })
 
   it('re-arms a persisted future timer on start()', () => {
-    store.addTimer({ id: 'persisted-1', name: 'Boss Z', endsAt: Date.now() + 3000 })
+    store.addTimer({ id: 'persisted-1', name: 'Boss Z', endsAt: Date.now() + 3000, durationMs: 3000 })
     const expired: TimerRecord[] = []
     const manager = new TimerManager(store, (t) => expired.push(t))
     manager.start()

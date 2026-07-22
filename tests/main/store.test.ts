@@ -40,8 +40,8 @@ describe('AppStore', () => {
   })
 
   it('adds and removes a timer', () => {
-    store.addTimer({ id: 't1', name: 'Boss X', endsAt: 123456 })
-    expect(store.getConfig().timers).toEqual([{ id: 't1', name: 'Boss X', endsAt: 123456 }])
+    store.addTimer({ id: 't1', name: 'Boss X', endsAt: 123456, durationMs: 60000 })
+    expect(store.getConfig().timers).toEqual([{ id: 't1', name: 'Boss X', endsAt: 123456, durationMs: 60000 }])
     store.removeTimer('t1')
     expect(store.getConfig().timers).toEqual([])
   })

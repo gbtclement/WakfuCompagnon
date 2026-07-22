@@ -21,7 +21,7 @@ export class TimerManager {
   }
 
   createTimer(name: string, durationMs: number): TimerRecord {
-    const timer: TimerRecord = { id: randomUUID(), name, endsAt: Date.now() + durationMs }
+    const timer: TimerRecord = { id: randomUUID(), name, endsAt: Date.now() + durationMs, durationMs }
     this.store.addTimer(timer)
     this.arm(timer)
     return timer
