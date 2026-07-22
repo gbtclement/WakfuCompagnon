@@ -35,10 +35,10 @@ describe('AppStore', () => {
   })
 
   it('adds and removes a followed quest id without duplicates', () => {
-    store.addFollowedQuest(-1123)
-    store.addFollowedQuest(-1123)
-    expect(store.getConfig().followedQuestIds).toEqual([-1123])
-    store.removeFollowedQuest(-1123)
+    store.addFollowedQuest('q1')
+    store.addFollowedQuest('q1')
+    expect(store.getConfig().followedQuestIds).toEqual(['q1'])
+    store.removeFollowedQuest('q1')
     expect(store.getConfig().followedQuestIds).toEqual([])
   })
 
@@ -55,14 +55,16 @@ describe('AppStore', () => {
     expect(store.getConfig().history).toEqual([event])
   })
 
-  it('adds, updates, and removes an environmental quest', () => {
-    store.addEnvironmentalQuest({ id: -1123, name: 'Challenge #1123' })
-    expect(store.getConfig().environmentalQuests).toEqual([{ id: -1123, name: 'Challenge #1123' }])
+  it('adds, updates, and removes an environmental quest with a generated id', () => {
+    const created = store.addEnvironmentalQuest('Solo : Crocodailles de la Banquise')
+    expect(created.name).toBe('Solo : Crocodailles de la Banquise')
+    expect(typeof created.id).toBe('string')
+    expect(store.getConfig().environmentalQuests).toEqual([created])
 
-    store.updateEnvironmentalQuest(-1123, 'Les Silènes en Sommeil')
-    expect(store.getConfig().environmentalQuests).toEqual([{ id: -1123, name: 'Les Silènes en Sommeil' }])
+    store.updateEnvironmentalQuest(created.id, 'Nom corrigé')
+    expect(store.getConfig().environmentalQuests).toEqual([{ id: created.id, name: 'Nom corrigé' }])
 
-    store.removeEnvironmentalQuest(-1123)
+    store.removeEnvironmentalQuest(created.id)
     expect(store.getConfig().environmentalQuests).toEqual([])
   })
 
@@ -78,20 +80,20 @@ describe('AppStore', () => {
   })
 
   it('adds, updates, and removes an exploit', () => {
-    store.addExploit({ id: 'e1', name: 'Maître des Silènes', questIds: [-1123], archimonsterIds: ['a1'] })
-    expect(store.getConfig().exploits).toEqual([{ id: 'e1', name: 'Maître des Silènes', questIds: [-1123], archimonsterIds: ['a1'] }])
+    store.addExploit({ id: 'e1', name: 'Maître des Silènes', questIds: ['q1'], archimonsterIds: ['a1'] })
+    expect(store.getConfig().exploits).toEqual([{ id: 'e1', name: 'Maître des Silènes', questIds: ['q1'], archimonsterIds: ['a1'] }])
 
-    store.updateExploit('e1', 'Maître des Silènes', [-1123, -1134], ['a1'])
-    expect(store.getConfig().exploits).toEqual([{ id: 'e1', name: 'Maître des Silènes', questIds: [-1123, -1134], archimonsterIds: ['a1'] }])
+    store.updateExploit('e1', 'Maître des Silènes', ['q1', 'q2'], ['a1'])
+    expect(store.getConfig().exploits).toEqual([{ id: 'e1', name: 'Maître des Silènes', questIds: ['q1', 'q2'], archimonsterIds: ['a1'] }])
 
     store.removeExploit('e1')
     expect(store.getConfig().exploits).toEqual([])
   })
 
   it('removing an environmental quest strips it from exploits that reference it', () => {
-    store.addExploit({ id: 'e1', name: 'Maître des Silènes', questIds: [-1123, -1134], archimonsterIds: [] })
-    store.removeEnvironmentalQuest(-1123)
-    expect(store.getConfig().exploits).toEqual([{ id: 'e1', name: 'Maître des Silènes', questIds: [-1134], archimonsterIds: [] }])
+    store.addExploit({ id: 'e1', name: 'Maître des Silènes', questIds: ['q1', 'q2'], archimonsterIds: [] })
+    store.removeEnvironmentalQuest('q1')
+    expect(store.getConfig().exploits).toEqual([{ id: 'e1', name: 'Maître des Silènes', questIds: ['q2'], archimonsterIds: [] }])
   })
 
   it('removing an archimonster strips it from exploits that reference it', () => {

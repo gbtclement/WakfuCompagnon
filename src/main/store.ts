@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto'
 import Store from 'electron-store'
 import { WakfuEvent } from './parsers/types'
 
@@ -9,7 +10,7 @@ export interface TimerRecord {
 }
 
 export interface EnvironmentalQuest {
-  id: number
+  id: string
   name: string
 }
 
@@ -22,13 +23,13 @@ export interface Archimonster {
 export interface Exploit {
   id: string
   name: string
-  questIds: number[]
+  questIds: string[]
   archimonsterIds: string[]
 }
 
 export interface AppConfig {
   logPath: string | null
-  followedQuestIds: number[]
+  followedQuestIds: string[]
   timers: TimerRecord[]
   history: WakfuEvent[]
   environmentalQuests: EnvironmentalQuest[]
@@ -69,14 +70,14 @@ export class AppStore {
     this.store.set('logPath', path)
   }
 
-  addFollowedQuest(id: number): void {
+  addFollowedQuest(id: string): void {
     const ids = this.store.get('followedQuestIds')
     if (!ids.includes(id)) {
       this.store.set('followedQuestIds', [...ids, id])
     }
   }
 
-  removeFollowedQuest(id: number): void {
+  removeFollowedQuest(id: string): void {
     const ids = this.store.get('followedQuestIds')
     this.store.set('followedQuestIds', ids.filter((existing) => existing !== id))
   }
@@ -93,16 +94,18 @@ export class AppStore {
     this.store.set('history', [...this.store.get('history'), event])
   }
 
-  addEnvironmentalQuest(quest: EnvironmentalQuest): void {
+  addEnvironmentalQuest(name: string): EnvironmentalQuest {
+    const quest: EnvironmentalQuest = { id: randomUUID(), name }
     this.store.set('environmentalQuests', [...this.store.get('environmentalQuests'), quest])
+    return quest
   }
 
-  updateEnvironmentalQuest(id: number, name: string): void {
+  updateEnvironmentalQuest(id: string, name: string): void {
     const quests = this.store.get('environmentalQuests').map((q) => (q.id === id ? { ...q, name } : q))
     this.store.set('environmentalQuests', quests)
   }
 
-  removeEnvironmentalQuest(id: number): void {
+  removeEnvironmentalQuest(id: string): void {
     this.store.set('environmentalQuests', this.store.get('environmentalQuests').filter((q) => q.id !== id))
     const exploits = this.store.get('exploits').map((e) => ({
       ...e,
@@ -133,7 +136,7 @@ export class AppStore {
     this.store.set('exploits', [...this.store.get('exploits'), exploit])
   }
 
-  updateExploit(id: string, name: string, questIds: number[], archimonsterIds: string[]): void {
+  updateExploit(id: string, name: string, questIds: string[], archimonsterIds: string[]): void {
     const exploits = this.store.get('exploits').map((e) => (e.id === id ? { ...e, name, questIds, archimonsterIds } : e))
     this.store.set('exploits', exploits)
   }
