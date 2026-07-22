@@ -39,10 +39,16 @@ app.whenReady().then(() => {
 
   const store = new AppStore()
 
-  if (store.getConfig().environmentalQuests.length === 0) {
-    const staticQuests = require('./data/environmentalQuests.json') as Record<string, string>
-    for (const [id, name] of Object.entries(staticQuests)) {
-      store.addEnvironmentalQuest({ id: Number(id), name })
+  const hasOldNumericQuestIds = store.getConfig().environmentalQuests.some(
+    (q) => typeof (q as { id: unknown }).id === 'number'
+  )
+  if (hasOldNumericQuestIds) {
+    const config = store.getConfig()
+    for (const quest of config.environmentalQuests) {
+      store.removeEnvironmentalQuest(quest.id)
+    }
+    for (const followedId of config.followedQuestIds) {
+      store.removeFollowedQuest(followedId)
     }
   }
 
