@@ -26,8 +26,6 @@ function typeLabel(event: WakfuEvent): string {
   switch (event.type) {
     case 'server-connection':
       return 'Serveur'
-    case 'environmental-quest':
-      return 'Challenge'
     case 'quest-completed':
       return 'Quête'
     case 'quest-failed':
@@ -47,10 +45,6 @@ function describe(event: WakfuEvent): string {
   switch (event.type) {
     case 'server-connection':
       return `Connexion au serveur ${event.server}`
-    case 'environmental-quest':
-      return event.challengeId === -1
-        ? 'Aucun challenge actif'
-        : `Challenge actif : #${event.challengeId}`
     case 'quest-completed':
       return `Quête remportée : ${event.questName}`
     case 'quest-failed':
