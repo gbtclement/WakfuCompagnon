@@ -21,13 +21,13 @@ export const useAdminStore = defineStore('admin', {
     async load(): Promise<void> {
       this.config = await window.wakfuApi.getConfig()
     },
-    async addQuest(id: number, name: string): Promise<void> {
-      this.config = await window.wakfuApi.addEnvironmentalQuest(id, name)
+    async addQuest(name: string): Promise<void> {
+      this.config = await window.wakfuApi.addEnvironmentalQuest(name)
     },
-    async updateQuest(id: number, name: string): Promise<void> {
+    async updateQuest(id: string, name: string): Promise<void> {
       this.config = await window.wakfuApi.updateEnvironmentalQuest(id, name)
     },
-    async removeQuest(id: number): Promise<void> {
+    async removeQuest(id: string): Promise<void> {
       this.config = await window.wakfuApi.removeEnvironmentalQuest(id)
     },
     async addArchimonster(name: string, respawnMinutes: number): Promise<void> {
@@ -39,10 +39,10 @@ export const useAdminStore = defineStore('admin', {
     async removeArchimonster(id: string): Promise<void> {
       this.config = await window.wakfuApi.removeArchimonster(id)
     },
-    async addExploit(name: string, questIds: number[], archimonsterIds: string[]): Promise<void> {
+    async addExploit(name: string, questIds: string[], archimonsterIds: string[]): Promise<void> {
       this.config = await window.wakfuApi.addExploit(name, questIds, archimonsterIds)
     },
-    async updateExploit(id: string, name: string, questIds: number[], archimonsterIds: string[]): Promise<void> {
+    async updateExploit(id: string, name: string, questIds: string[], archimonsterIds: string[]): Promise<void> {
       this.config = await window.wakfuApi.updateExploit(id, name, questIds, archimonsterIds)
     },
     async removeExploit(id: string): Promise<void> {

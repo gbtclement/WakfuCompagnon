@@ -32,9 +32,13 @@ export const useAppStore = defineStore('app', {
         if (event.type === 'server-connection') {
           toastStore.push('info', 'Connecté au serveur', event.server)
         }
-        if (event.type === 'environmental-quest' && event.challengeId !== -1 && this.config.followedQuestIds.includes(event.challengeId)) {
-          const quest = this.config.environmentalQuests.find((q) => q.id === event.challengeId)
-          toastStore.push('success', 'Quête environnementale rencontrée', quest?.name ?? `Quête #${event.challengeId}`)
+        if (event.type === 'quest-completed' || event.type === 'quest-failed') {
+          const isFollowedEnvironmentalQuest = this.config.environmentalQuests.some(
+            (q) => q.name === event.questName && this.config.followedQuestIds.includes(q.id)
+          )
+          if (isFollowedEnvironmentalQuest) {
+            toastStore.push('success', 'Quête environnementale rencontrée', event.questName)
+          }
         }
         if (event.type === 'quest-completed') {
           toastStore.push('success', 'Quête remportée', event.questName)
@@ -55,10 +59,10 @@ export const useAppStore = defineStore('app', {
       const path = await window.wakfuApi.browseLogFile()
       if (path) this.config = await window.wakfuApi.getConfig()
     },
-    async followQuest(id: number): Promise<void> {
+    async followQuest(id: string): Promise<void> {
       this.config = await window.wakfuApi.followQuest(id)
     },
-    async unfollowQuest(id: number): Promise<void> {
+    async unfollowQuest(id: string): Promise<void> {
       this.config = await window.wakfuApi.unfollowQuest(id)
     },
     async createTimer(name: string, durationMs: number): Promise<void> {
