@@ -1,9 +1,12 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import type { AppConfig, TimerRecord } from '../main/store'
 import type { WakfuEvent } from '../main/parsers/types'
+import type { UpdateInfo } from '../main/updateCheck'
 
 const api = {
   getConfig: (): Promise<AppConfig> => ipcRenderer.invoke('get-config'),
+  checkForUpdate: (): Promise<UpdateInfo | null> => ipcRenderer.invoke('check-for-update'),
+  openExternal: (url: string): Promise<void> => ipcRenderer.invoke('open-external', url),
   setLogPath: (path: string): Promise<AppConfig> => ipcRenderer.invoke('set-log-path', path),
   browseLogFile: (): Promise<string | null> => ipcRenderer.invoke('browse-log-file'),
   followQuest: (id: string): Promise<AppConfig> => ipcRenderer.invoke('follow-quest', id),

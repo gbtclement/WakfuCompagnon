@@ -7,6 +7,7 @@
       </div>
     </main>
     <ToastStack />
+    <UpdateBadge />
   </div>
 </template>
 
@@ -14,6 +15,7 @@
 import { onMounted } from 'vue'
 import NavBar from './components/NavBar.vue'
 import ToastStack from './components/ToastStack.vue'
+import UpdateBadge from './components/UpdateBadge.vue'
 import { useAppStore } from './stores/appState'
 import { useAdminStore } from './stores/admin'
 

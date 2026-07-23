@@ -1,9 +1,10 @@
 import { randomUUID } from 'crypto'
-import { ipcMain, dialog, BrowserWindow } from 'electron'
+import { ipcMain, shell, app, dialog, BrowserWindow } from 'electron'
 import { AppStore } from './store'
 import { LogWatcher } from './logWatcher'
 import { TimerManager } from './timers'
 import { notify } from './notifications'
+import { checkForUpdate } from './updateCheck'
 
 export function registerIpcHandlers(
   store: AppStore,
@@ -12,6 +13,10 @@ export function registerIpcHandlers(
   getWindow: () => BrowserWindow | null
 ): void {
   ipcMain.handle('get-config', () => store.getConfig())
+
+  ipcMain.handle('check-for-update', () => checkForUpdate(app.getVersion()))
+
+  ipcMain.handle('open-external', (_event, url: string) => shell.openExternal(url))
 
   ipcMain.handle('set-log-path', (_event, path: string) => {
     store.setLogPath(path)
