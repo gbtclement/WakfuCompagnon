@@ -16,7 +16,16 @@ export function registerIpcHandlers(
 
   ipcMain.handle('check-for-update', () => checkForUpdate(app.getVersion()))
 
-  ipcMain.handle('open-external', (_event, url: string) => shell.openExternal(url))
+  ipcMain.handle('open-external', (_event, url: string) => {
+    let parsed: URL
+    try {
+      parsed = new URL(url)
+    } catch {
+      return
+    }
+    if (parsed.protocol !== 'https:' || parsed.hostname !== 'github.com') return
+    return shell.openExternal(parsed.toString())
+  })
 
   ipcMain.handle('set-log-path', (_event, path: string) => {
     store.setLogPath(path)
