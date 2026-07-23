@@ -8,13 +8,11 @@
     <div class="panel">
       <h2 class="h2">Quêtes environnementales</h2>
       <div v-for="quest in admin.config.environmentalQuests" :key="quest.id" class="row">
-        <span class="row-id">#{{ quest.id }}</span>
         <span class="row-name">{{ quest.name }}</span>
         <button class="delete-btn" @click="admin.removeQuest(quest.id)">Retirer</button>
       </div>
       <form class="create-form" @submit.prevent="submitQuest">
-        <input v-model.number="newQuestId" type="number" placeholder="ID (ex: -1123)" class="id-field" required />
-        <input v-model="newQuestName" placeholder="Nom de la quête" class="field" required />
+        <input v-model="newQuestName" placeholder="Nom exact de la quête (ex: Solo : Crocodailles de la Banquise)" class="field" required />
         <button type="submit" class="primary-btn">Ajouter</button>
       </form>
     </div>
@@ -71,13 +69,10 @@ import { useAdminStore } from '../stores/admin'
 
 const admin = useAdminStore()
 
-const newQuestId = ref<number | null>(null)
 const newQuestName = ref('')
 
 function submitQuest(): void {
-  if (newQuestId.value === null) return
-  admin.addQuest(newQuestId.value, newQuestName.value)
-  newQuestId.value = null
+  admin.addQuest(newQuestName.value)
   newQuestName.value = ''
 }
 
@@ -91,7 +86,7 @@ function submitArchimonster(): void {
 }
 
 const newExploitName = ref('')
-const newExploitQuestIds = ref<number[]>([])
+const newExploitQuestIds = ref<string[]>([])
 const newExploitArchimonsterIds = ref<string[]>([])
 
 function submitExploit(): void {
@@ -144,13 +139,6 @@ function submitExploit(): void {
   gap: 14px;
   padding: 9px 4px;
   border-bottom: 1px solid color-mix(in srgb, var(--border) 33%, transparent);
-}
-
-.row-id {
-  font-size: 12px;
-  color: var(--text-secondary);
-  width: 64px;
-  flex-shrink: 0;
 }
 
 .row-name {
