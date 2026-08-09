@@ -41,9 +41,13 @@ Electron main process --HTTP(JSON)--> API Node (Fastify) --SQL--> PostgreSQL (Su
         | tail + parse wakfu.log (inchangé, local)
 ```
 
-Le backend est un projet séparé (nouveau repo Git), pas un sous-dossier de wakfu-companion — ce
-repo reste le client desktop uniquement, cohérent avec son architecture actuelle main/preload/
-renderer strictement locale.
+Le backend vit dans le même repo Git (monorepo public), dans un nouveau dossier `server/` à la
+racine, à côté de `src/`. Le client Electron existant n'est pas déplacé — `src/`, `tests/`, et
+tous les fichiers de config à la racine (`tsconfig*.json`, `vite.config.ts`, `vitest.config.ts`,
+`electron-builder.yml`) restent exactement où ils sont, zéro risque sur le build actuel. `server/`
+a son propre `package.json` indépendant (pas de workspace npm partagé — deux projets Node
+autonomes côte à côte dans le même repo Git). Aucun secret (mot de passe DB, JWT secret) n'est
+jamais commité — uniquement des variables d'environnement côté hébergeur.
 
 ## Schéma de données (PostgreSQL)
 
