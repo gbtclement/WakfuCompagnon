@@ -26,9 +26,9 @@ compte/connexion ne déverrouille que le nouvel onglet "Amis".
 
 Deux nouveaux composants, en plus du client Electron existant :
 
-1. **Backend** (nouveau repo séparé, hors de ce dossier) : une API HTTP (Node + Fastify) qui
-   expose l'authentification, la gestion des amis et la synchronisation des métiers. Déployée sur
-   un hébergeur gratuit type Fly.io (ou Render), stateless.
+1. **Backend** (dossier `server/` dans ce même repo, voir détail plus bas) : une API HTTP
+   (Node + Fastify) qui expose l'authentification, la gestion des amis et la synchronisation des
+   métiers. Déployée sur un hébergeur gratuit type Fly.io (ou Render), stateless.
 2. **Base de données** : PostgreSQL géré par **Supabase** (tier gratuit pérenne). Le backend
    custom s'y connecte comme à un Postgres classique (via une chaîne de connexion) — on n'utilise
    pas l'auth ni l'API auto-générée de Supabase, uniquement l'hébergement de la base.
@@ -193,7 +193,8 @@ Chargement à l'ouverture de l'onglet Amis (pull), pas de temps réel/WebSocket 
   une variante `+2 niveaux`, et un métier inconnu (doit retourner `null`).
 - Store/logique de calcul de niveau (delta + plafond 155) : tests unitaires côté `appState.ts` ou
   équivalent.
-- Backend : hors périmètre de ce repo, sera testé dans son propre projet.
+- Backend : suite de tests Vitest propre à `server/` (voir plan d'implémentation backend),
+  intégration Fastify `.inject()` contre une vraie base Postgres de test.
 
 ## Hors périmètre (v1)
 
