@@ -78,6 +78,13 @@ then `undefined` and `pg` fails with `SASL: SCRAM-SERVER-FIRST-MESSAGE: client p
 string`. A vitest `setupFiles` entry runs before any test file's imports, closing that ordering
 gap.
 
+**Second implementation note (discovered during Task 9):** `server/vitest.config.ts` must also set
+`test.fileParallelism: false`. All route test files share one real Postgres database and each
+`beforeEach` calls `resetTestDb()` (`TRUNCATE ... CASCADE`) — running test files in parallel (the
+vitest default) causes concurrent `TRUNCATE`s to deadlock (`error: deadlock detected` from
+Postgres). Each file passes individually; the deadlock only appears with the full suite. Forcing
+sequential file execution avoids it — acceptable for this suite's size (21 tests, ~5s total).
+
 **Interfaces summary (for cross-task reference):**
 - `db.ts` exports `pool: Pool` and `query<T>(text: string, params?: unknown[]): Promise<T[]>`.
 - `jobs.ts` exports `JOB_NAMES: readonly string[]`, `isValidJobName(name: string): boolean`,
