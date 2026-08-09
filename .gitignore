@@ -27,3 +27,6 @@ Thumbs.db
 
 # Archives dropped in for reference (prototypes, exports)
 *.zip
+
+# Local git worktrees
+.worktrees/
