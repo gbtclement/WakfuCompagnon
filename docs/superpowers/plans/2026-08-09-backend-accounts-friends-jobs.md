@@ -66,7 +66,17 @@ server/
       jobsRoutes.test.ts
       friends.test.ts
     testDb.ts                 # test helper: fresh schema per test run, truncate between tests
+    setupEnv.ts                # vitest setupFiles entry: loads dotenv/config before any test
+                                # file imports src/db.ts (which reads DATABASE_URL at module load)
 ```
+
+**Implementation note (discovered during Task 6):** `server/vitest.config.ts` must set
+`test.setupFiles: ['./tests/setupEnv.ts']`. Without it, test files that import `src/app.ts` (which
+transitively imports `src/db.ts`, constructing the `pg.Pool` at module-load time) can run before
+`testDb.ts`'s own `import 'dotenv/config'` executes, depending on import order — `DATABASE_URL` is
+then `undefined` and `pg` fails with `SASL: SCRAM-SERVER-FIRST-MESSAGE: client password must be a
+string`. A vitest `setupFiles` entry runs before any test file's imports, closing that ordering
+gap.
 
 **Interfaces summary (for cross-task reference):**
 - `db.ts` exports `pool: Pool` and `query<T>(text: string, params?: unknown[]): Promise<T[]>`.
