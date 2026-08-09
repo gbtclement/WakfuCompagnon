@@ -55,7 +55,7 @@ export async function authPlugin(app: FastifyInstance): Promise<void> {
 
       await client.query('COMMIT');
 
-      const token = app.jwt.sign({ userId: user.id });
+      const token = app.jwt.sign({ userId: user.id }, { expiresIn: '30d' });
       return reply.code(201).send({
         token,
         user: { id: user.id, username: user.username, friendCode: user.friend_code },
@@ -80,7 +80,11 @@ export async function authPlugin(app: FastifyInstance): Promise<void> {
 
     const rows = await pool.query(
       `SELECT id, username, friend_code, password_hash FROM users
-       WHERE username = $1 OR email = $1`,
+       WHERE username = $1
+       UNION ALL
+       SELECT id, username, friend_code, password_hash FROM users
+       WHERE email = $1
+       LIMIT 1`,
       [usernameOrEmail]
     );
     const user = rows.rows[0];
@@ -88,7 +92,7 @@ export async function authPlugin(app: FastifyInstance): Promise<void> {
       return reply.code(401).send({ error: 'Invalid credentials' });
     }
 
-    const token = app.jwt.sign({ userId: user.id });
+    const token = app.jwt.sign({ userId: user.id }, { expiresIn: '30d' });
     return reply.send({
       token,
       user: { id: user.id, username: user.username, friendCode: user.friend_code },

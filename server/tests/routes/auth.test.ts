@@ -111,4 +111,38 @@ describe('POST /auth/login', () => {
 
     expect(response.statusCode).toBe(401);
   });
+
+  it('logs into the account matched by username, not a different account whose email happens to equal that username', async () => {
+    const app = buildApp();
+    // victim's email equals attacker's chosen username
+    await app.inject({
+      method: 'POST',
+      url: '/auth/register',
+      payload: {
+        username: 'victim',
+        email: 'attacker@example.com',
+        password: 'victim-password',
+        jobs: {},
+      },
+    });
+    await app.inject({
+      method: 'POST',
+      url: '/auth/register',
+      payload: {
+        username: 'attacker@example.com',
+        email: 'attacker2@example.com',
+        password: 'attacker-password',
+        jobs: {},
+      },
+    });
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/auth/login',
+      payload: { usernameOrEmail: 'attacker@example.com', password: 'attacker-password' },
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json().user.username).toBe('attacker@example.com');
+  });
 });
