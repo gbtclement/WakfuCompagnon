@@ -112,7 +112,7 @@ server/
   },
   "dependencies": {
     "fastify": "^5.1.0",
-    "@fastify/jwt": "^9.0.1",
+    "@fastify/jwt": "^10.2.1",
     "pg": "^8.13.1",
     "argon2": "^0.41.1",
     "zod": "^3.24.1",
