@@ -423,8 +423,12 @@ Expected: FAIL — `src/main/session.ts` does not exist.
 ```typescript
 import { safeStorage } from 'electron'
 
+function encryptionAvailable(): boolean {
+  return typeof safeStorage !== 'undefined' && safeStorage.isEncryptionAvailable()
+}
+
 export function encryptToken(token: string): string {
-  if (safeStorage.isEncryptionAvailable()) {
+  if (encryptionAvailable()) {
     return safeStorage.encryptString(token).toString('base64')
   }
   return Buffer.from(token, 'utf-8').toString('base64')
@@ -432,7 +436,7 @@ export function encryptToken(token: string): string {
 
 export function decryptToken(encrypted: string): string {
   const buffer = Buffer.from(encrypted, 'base64')
-  if (safeStorage.isEncryptionAvailable()) {
+  if (encryptionAvailable()) {
     return safeStorage.decryptString(buffer)
   }
   return buffer.toString('utf-8')
@@ -442,9 +446,16 @@ export function decryptToken(encrypted: string): string {
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run tests/main/session.test.ts`
-Expected: PASS (falls back to base64 under vitest since `safeStorage.isEncryptionAvailable()` is
-false outside a running Electron app — this is expected and fine, the real Electron runtime always
-returns true on supported platforms).
+Expected: PASS.
+
+**Implementation note (discovered during Task 4):** under vitest (plain Node, outside a running
+Electron process), the `electron` module's `safeStorage` export is `undefined`, not an object
+whose `isEncryptionAvailable()` returns `false` — calling `safeStorage.isEncryptionAvailable()`
+directly throws `Cannot read properties of undefined`. Guard with a
+`typeof safeStorage !== 'undefined' && safeStorage.isEncryptionAvailable()` check (see
+`encryptionAvailable()` helper in the code above) so the fallback path is reached instead of
+throwing. The packaged app always runs inside real Electron, where `safeStorage` is defined and
+`isEncryptionAvailable()` reflects real OS-backed encryption support.
 
 - [ ] **Step 5: Commit**
 
