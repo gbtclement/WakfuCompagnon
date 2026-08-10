@@ -1,11 +1,9 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import type { AppConfig, TimerRecord } from '../main/store'
 import type { WakfuEvent } from '../main/parsers/types'
-import type { UpdateInfo } from '../main/updateCheck'
 
 const api = {
   getConfig: (): Promise<AppConfig> => ipcRenderer.invoke('get-config'),
-  checkForUpdate: (): Promise<UpdateInfo | null> => ipcRenderer.invoke('check-for-update'),
   openExternal: (url: string): Promise<void> => ipcRenderer.invoke('open-external', url),
   setLogPath: (path: string): Promise<AppConfig> => ipcRenderer.invoke('set-log-path', path),
   browseLogFile: (): Promise<string | null> => ipcRenderer.invoke('browse-log-file'),
@@ -63,7 +61,20 @@ const api = {
   acceptFriendRequest: (id: string): Promise<void> => ipcRenderer.invoke('friends-accept-request', id),
   rejectFriendRequest: (id: string): Promise<void> => ipcRenderer.invoke('friends-reject-request', id),
   getFriends: (): Promise<{ username: string; jobs: { jobName: string; level: number }[] }[]> =>
-    ipcRenderer.invoke('friends-list')
+    ipcRenderer.invoke('friends-list'),
+  downloadUpdate: (): Promise<void> => ipcRenderer.invoke('update-download'),
+  onUpdateAvailable: (callback: (info: { version: string }) => void): void => {
+    ipcRenderer.on('update-available-pushed', (_event, payload: { version: string }) => callback(payload))
+  },
+  onUpdateDownloadProgress: (callback: (info: { percent: number }) => void): void => {
+    ipcRenderer.on('update-download-progress-pushed', (_event, payload: { percent: number }) => callback(payload))
+  },
+  onUpdateDownloaded: (callback: () => void): void => {
+    ipcRenderer.on('update-downloaded-pushed', () => callback())
+  },
+  onUpdateError: (callback: (info: { message: string }) => void): void => {
+    ipcRenderer.on('update-error-pushed', (_event, payload: { message: string }) => callback(payload))
+  }
 }
 
 export type WakfuApi = typeof api
