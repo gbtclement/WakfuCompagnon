@@ -14,7 +14,9 @@ export const useAdminStore = defineStore('admin', {
       history: [],
       environmentalQuests: [],
       archimonsters: [],
-      exploits: []
+      exploits: [],
+      authToken: null,
+      currentUser: null
     }
   }),
   actions: {

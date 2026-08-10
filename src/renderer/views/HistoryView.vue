@@ -32,11 +32,15 @@ function typeLabel(event: WakfuEvent): string {
       return 'Quête'
     case 'achievement':
       return 'Haut fait'
+    case 'job-level-up':
+      return 'Métier'
   }
 }
 
 function badgeClass(event: WakfuEvent): string {
-  if (event.type === 'quest-completed' || event.type === 'achievement') return 'type-badge-gold'
+  if (event.type === 'quest-completed' || event.type === 'achievement' || event.type === 'job-level-up') {
+    return 'type-badge-gold'
+  }
   if (event.type === 'quest-failed') return 'type-badge-danger'
   return 'type-badge-accent'
 }
@@ -51,6 +55,8 @@ function describe(event: WakfuEvent): string {
       return `Quête échouée : ${event.questName}`
     case 'achievement':
       return `Haut fait débloqué : #${event.achievementId}`
+    case 'job-level-up':
+      return `${event.jobName} : +${event.levelsGained} niveau${event.levelsGained > 1 ? 'x' : ''}`
   }
 }
 </script>

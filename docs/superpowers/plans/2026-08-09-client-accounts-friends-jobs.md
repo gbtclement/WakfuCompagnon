@@ -326,10 +326,24 @@ Expected: PASS
 Run: `npx vitest run tests/parsers`
 Expected: all PASS (existing parsers untouched, new one added).
 
+**Implementation note (fully surfaces at Task 9's renderer typecheck, but caused by this task):**
+adding the `'job-level-up'` variant to `WakfuEvent` breaks exhaustive `switch (event.type)`
+statements in two renderer views that render event history:
+`src/renderer/views/HistoryView.vue` (`typeLabel`/`badgeClass`/`describe` functions) and
+`src/renderer/views/ServerStatusView.vue` (`dotClass`/`describe` functions) — TypeScript's
+switch-without-default exhaustiveness check only flags these once the union actually gains a case
+they don't handle, so this only becomes visible when you run `npx vue-tsc --noEmit -p
+tsconfig.json` (not done as part of this task's own verification, which only checks parsers).
+Fix now rather than deferring: add a `case 'job-level-up':` branch to each function, e.g.
+`typeLabel` → `'Métier'`, `describe` → `` `${event.jobName} : +${event.levelsGained} niveau${event.levelsGained > 1 ? 'x' : ''}` ``,
+and treat it as a "gold" badge/dot alongside `quest-completed`/`achievement` in `badgeClass`/
+`dotClass`. Run `npx vue-tsc --noEmit -p tsconfig.json` before moving on to confirm both files are
+clean.
+
 - [ ] **Step 8: Commit**
 
 ```bash
-git add src/main/parsers/types.ts src/main/parsers/jobLevelUp.ts tests/parsers/fixtures.ts tests/parsers/jobLevelUp.test.ts
+git add src/main/parsers/types.ts src/main/parsers/jobLevelUp.ts tests/parsers/fixtures.ts tests/parsers/jobLevelUp.test.ts src/renderer/views/HistoryView.vue src/renderer/views/ServerStatusView.vue
 git commit -m "client: add job-level-up log parser"
 ```
 
@@ -609,10 +623,20 @@ Expected: PASS (all existing tests plus the new one).
 Run: `npx tsc --noEmit -p tsconfig.main.json`
 Expected: no errors.
 
+**Implementation note (fully surfaces at Task 9's renderer typecheck, but caused by this task):**
+adding required fields to `AppConfig` breaks every renderer file that hand-builds a default
+`AppConfig` object inline. Two Pinia stores do this: `src/renderer/stores/appState.ts`'s
+`AppStateShape`'s `config` initial value, and `src/renderer/stores/admin.ts`'s `AdminStateShape`'s
+`config` initial value. Both need `authToken: null, currentUser: null` added to their inline
+object literal, in this same task (don't defer to Task 9 — `npx tsc --noEmit -p
+tsconfig.main.json` above only checks main/preload, not the renderer, so this step's typecheck
+won't catch it; run `npx vue-tsc --noEmit -p tsconfig.json` too before moving on, and fix both
+files if it fails).
+
 - [ ] **Step 7: Commit**
 
 ```bash
-git add src/main/store.ts tests/main/store.test.ts
+git add src/main/store.ts tests/main/store.test.ts src/renderer/stores/appState.ts src/renderer/stores/admin.ts
 git commit -m "client: add encrypted session persistence to AppStore"
 ```
 
