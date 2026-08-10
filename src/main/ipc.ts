@@ -1,10 +1,10 @@
 import { randomUUID } from 'crypto'
-import { ipcMain, shell, app, dialog, BrowserWindow } from 'electron'
+import { ipcMain, shell, dialog, BrowserWindow } from 'electron'
 import { AppStore } from './store'
 import { LogWatcher } from './logWatcher'
 import { TimerManager } from './timers'
 import { notify } from './notifications'
-import { checkForUpdate } from './updateCheck'
+import { downloadUpdate } from './autoUpdate'
 import { getApiClient, ApiError } from './apiClient'
 import { isValidJobName, clampLevel } from './jobs'
 
@@ -16,7 +16,7 @@ export function registerIpcHandlers(
 ): void {
   ipcMain.handle('get-config', () => store.getConfig())
 
-  ipcMain.handle('check-for-update', () => checkForUpdate(app.getVersion()))
+  ipcMain.handle('update-download', () => downloadUpdate())
 
   ipcMain.handle('open-external', (_event, url: string) => {
     let parsed: URL
