@@ -5,6 +5,7 @@ import { LogWatcher } from './logWatcher'
 import { TimerManager } from './timers'
 import { notify } from './notifications'
 import { registerIpcHandlers } from './ipc'
+import { registerAutoUpdate } from './autoUpdate'
 import { detectDefaultLogPath, ZAAP_LOG_PATH } from './logPathDetection'
 import { existsSync } from 'fs'
 
@@ -67,6 +68,7 @@ app.whenReady().then(() => {
   timerManager.start()
 
   registerIpcHandlers(store, watcher, timerManager, () => mainWindow)
+  registerAutoUpdate(() => mainWindow)
 })
 
 app.on('window-all-closed', () => {

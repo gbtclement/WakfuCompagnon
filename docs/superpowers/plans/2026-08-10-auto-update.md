@@ -332,11 +332,34 @@ export function createAutoUpdateRegistrar(updater: UpdaterLike) {
   return { registerAutoUpdate, downloadUpdate }
 }
 
-const defaultRegistrar = createAutoUpdateRegistrar(realAutoUpdater as unknown as UpdaterLike)
+let defaultRegistrar: ReturnType<typeof createAutoUpdateRegistrar> | null = null
 
-export const registerAutoUpdate = defaultRegistrar.registerAutoUpdate
-export const downloadUpdate = defaultRegistrar.downloadUpdate
+function getDefaultRegistrar(): ReturnType<typeof createAutoUpdateRegistrar> {
+  if (!defaultRegistrar) {
+    const { autoUpdater } = require('electron-updater') as typeof import('electron-updater')
+    defaultRegistrar = createAutoUpdateRegistrar(autoUpdater as unknown as UpdaterLike)
+  }
+  return defaultRegistrar
+}
+
+export function registerAutoUpdate(getWindow: () => BrowserWindow | null): void {
+  getDefaultRegistrar().registerAutoUpdate(getWindow)
+}
+
+export function downloadUpdate(): Promise<void> {
+  return getDefaultRegistrar().downloadUpdate()
+}
 ```
+
+**Implementation note (discovered during Task 2):** do NOT `import { autoUpdater } from
+'electron-updater'` at module scope. `electron-updater`'s `autoUpdater` getter reads
+`app.getVersion()` from Electron's `app` module the first time it's accessed — under vitest (plain
+Node, outside a running Electron process), `app` is undefined and this throws immediately at import
+time, before any test in the file can run (same class of problem as `net`/`safeStorage` elsewhere
+in this codebase). Fix: use a deferred `require('electron-updater')` inside a lazily-initialized
+`getDefaultRegistrar()`, so the real module is only touched when `registerAutoUpdate`/
+`downloadUpdate` are actually called from the running app — never at import time, so importing
+`autoUpdate.ts` under vitest is always safe.
 
 **Typing caveat:** `realAutoUpdater as unknown as UpdaterLike` sidesteps structural checking
 against `electron-updater`'s real event payloads. Its actual `update-available` event passes a
