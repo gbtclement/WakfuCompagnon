@@ -1,6 +1,6 @@
 import { net } from 'electron'
 
-export const DEFAULT_API_BASE_URL = 'http://localhost:3000'
+export const DEFAULT_API_BASE_URL = 'https://wakfu-companion-server.onrender.com'
 
 export class ApiError extends Error {
   status: number
