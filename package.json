@@ -1,6 +1,6 @@
 {
   "name": "wakfu-companion",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "commonjs",
   "main": "dist/main/main.js",
   "description": "Compagnon de bureau pour Wakfu : detection de serveur, suivi de quetes environnementales et timers d'archimonstres via lecture locale du log du jeu.",
