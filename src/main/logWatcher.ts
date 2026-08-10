@@ -4,11 +4,13 @@ import { LineParser, WakfuEvent } from './parsers/types'
 import { parseServerConnection } from './parsers/serverConnection'
 import { parseQuestCompleted } from './parsers/questCompleted'
 import { parseAchievement } from './parsers/achievement'
+import { parseJobLevelUp } from './parsers/jobLevelUp'
 
 const PARSERS: LineParser[] = [
   parseServerConnection,
   parseQuestCompleted,
-  parseAchievement
+  parseAchievement,
+  parseJobLevelUp
 ]
 
 interface LogWatcherOptions {
