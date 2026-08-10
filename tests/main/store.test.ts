@@ -25,7 +25,9 @@ describe('AppStore', () => {
       history: [],
       environmentalQuests: [],
       archimonsters: [],
-      exploits: []
+      exploits: [],
+      authToken: null,
+      currentUser: null
     })
   })
 
@@ -100,5 +102,20 @@ describe('AppStore', () => {
     store.addExploit({ id: 'e1', name: 'Maître des Silènes', questIds: [], archimonsterIds: ['a1', 'a2'] })
     store.removeArchimonster('a1')
     expect(store.getConfig().exploits).toEqual([{ id: 'e1', name: 'Maître des Silènes', questIds: [], archimonsterIds: ['a2'] }])
+  })
+
+  it('stores and retrieves an encrypted session, decrypted on read', () => {
+    expect(store.getSession()).toEqual({ token: null, user: null })
+
+    store.setSession('a.fake.jwt', { username: 'clement', friendCode: 'WC-ABCDEF' })
+    const session = store.getSession()
+    expect(session.token).toBe('a.fake.jwt')
+    expect(session.user).toEqual({ username: 'clement', friendCode: 'WC-ABCDEF' })
+
+    // the raw config field must not be the plaintext token
+    expect(store.getConfig().authToken).not.toBe('a.fake.jwt')
+
+    store.setSession(null, null)
+    expect(store.getSession()).toEqual({ token: null, user: null })
   })
 })

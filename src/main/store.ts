@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto'
 import Store from 'electron-store'
 import { WakfuEvent } from './parsers/types'
+import { encryptToken, decryptToken } from './session'
 
 export interface TimerRecord {
   id: string
@@ -35,6 +36,8 @@ export interface AppConfig {
   environmentalQuests: EnvironmentalQuest[]
   archimonsters: Archimonster[]
   exploits: Exploit[]
+  authToken: string | null
+  currentUser: { username: string; friendCode: string } | null
 }
 
 const DEFAULTS: AppConfig = {
@@ -44,7 +47,9 @@ const DEFAULTS: AppConfig = {
   history: [],
   environmentalQuests: [],
   archimonsters: [],
-  exploits: []
+  exploits: [],
+  authToken: null,
+  currentUser: null
 }
 
 export class AppStore {
@@ -62,7 +67,9 @@ export class AppStore {
       history: this.store.get('history'),
       environmentalQuests: this.store.get('environmentalQuests'),
       archimonsters: this.store.get('archimonsters'),
-      exploits: this.store.get('exploits')
+      exploits: this.store.get('exploits'),
+      authToken: this.store.get('authToken'),
+      currentUser: this.store.get('currentUser')
     }
   }
 
@@ -143,5 +150,18 @@ export class AppStore {
 
   removeExploit(id: string): void {
     this.store.set('exploits', this.store.get('exploits').filter((e) => e.id !== id))
+  }
+
+  setSession(token: string | null, user: { username: string; friendCode: string } | null): void {
+    this.store.set('authToken', token ? encryptToken(token) : null)
+    this.store.set('currentUser', user)
+  }
+
+  getSession(): { token: string | null; user: { username: string; friendCode: string } | null } {
+    const encrypted = this.store.get('authToken')
+    return {
+      token: encrypted ? decryptToken(encrypted) : null,
+      user: this.store.get('currentUser')
+    }
   }
 }
