@@ -30,6 +30,25 @@
       <span>Admin</span>
     </RouterLink>
 
+    <RouterLink
+      v-if="authStore.isLoggedIn"
+      to="/friends"
+      class="nav-link"
+      active-class="nav-link-active"
+    >
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2" /><path d="M3.5 19c0-3 2.5-5.5 5.5-5.5S14.5 16 14.5 19" /><circle cx="17" cy="9" r="2.6" /><path d="M15.5 13.2c2.3.3 4 2.4 4 5.3" /></svg>
+      <span>Amis</span>
+    </RouterLink>
+
+    <RouterLink v-if="!authStore.isLoggedIn" to="/login" class="nav-link" active-class="nav-link-active">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3.5h3.5a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H15" /><path d="M10 8l5 4-5 4" /><path d="M15 12H4" /></svg>
+      <span>Connexion</span>
+    </RouterLink>
+    <button v-else class="nav-link logout-link" @click="authStore.logout()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3.5h3.5a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H15" /><path d="M4 12h11M10 8l-4 4 4 4" /></svg>
+      <span>Déconnexion ({{ authStore.user?.username }})</span>
+    </button>
+
     <div class="server-pill">
       <span class="conn-dot" :class="{ 'conn-dot-idle': !currentServer }"></span>
       <div class="server-pill-text">
@@ -51,9 +70,11 @@
 import { computed } from 'vue'
 import { useAppStore } from '../stores/appState'
 import { useThemeStore } from '../stores/theme'
+import { useAuthStore } from '../stores/auth'
 
 const appStore = useAppStore()
 const themeStore = useThemeStore()
+const authStore = useAuthStore()
 
 const currentServer = computed(() => {
   const event = appStore.liveEvents.find((e) => e.type === 'server-connection')
@@ -117,6 +138,11 @@ const currentServer = computed(() => {
   background: var(--accent-soft);
   color: var(--accent);
   border: 1px solid color-mix(in srgb, var(--accent) 33%, transparent);
+}
+
+.logout-link {
+  border: none;
+  font-family: inherit;
 }
 
 .server-pill {

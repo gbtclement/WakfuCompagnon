@@ -5,6 +5,8 @@ import { LogWatcher } from './logWatcher'
 import { TimerManager } from './timers'
 import { notify } from './notifications'
 import { checkForUpdate } from './updateCheck'
+import { getApiClient, ApiError } from './apiClient'
+import { isValidJobName, clampLevel } from './jobs'
 
 export function registerIpcHandlers(
   store: AppStore,
@@ -107,6 +109,91 @@ export function registerIpcHandlers(
     return store.getConfig()
   })
 
+  const apiClient = getApiClient()
+
+  ipcMain.handle(
+    'auth-register',
+    async (
+      _event,
+      payload: { username: string; email: string; password: string; jobs: Record<string, number> }
+    ) => {
+      for (const jobName of Object.keys(payload.jobs)) {
+        if (!isValidJobName(jobName)) return { error: `Métier inconnu : ${jobName}` }
+      }
+      const clampedJobs = Object.fromEntries(
+        Object.entries(payload.jobs).map(([name, level]) => [name, clampLevel(level)])
+      )
+      try {
+        const result = await apiClient.register({ ...payload, jobs: clampedJobs })
+        store.setSession(result.token, { username: result.user.username, friendCode: result.user.friendCode })
+        return { user: { username: result.user.username, friendCode: result.user.friendCode } }
+      } catch (err) {
+        return { error: err instanceof ApiError ? err.message : 'Erreur réseau' }
+      }
+    }
+  )
+
+  ipcMain.handle('auth-login', async (_event, payload: { usernameOrEmail: string; password: string }) => {
+    try {
+      const result = await apiClient.login(payload)
+      store.setSession(result.token, { username: result.user.username, friendCode: result.user.friendCode })
+      return { user: { username: result.user.username, friendCode: result.user.friendCode } }
+    } catch (err) {
+      return { error: err instanceof ApiError ? err.message : 'Erreur réseau' }
+    }
+  })
+
+  ipcMain.handle('auth-logout', () => {
+    store.setSession(null, null)
+  })
+
+  ipcMain.handle('auth-get-session', () => {
+    const { user } = store.getSession()
+    return user
+  })
+
+  ipcMain.handle('job-get-mine', async () => {
+    const { token } = store.getSession()
+    if (!token) return []
+    return apiClient.getMyJobs(token)
+  })
+
+  ipcMain.handle('job-update-manual', async (_event, jobName: string, level: number) => {
+    const { token } = store.getSession()
+    if (!token || !isValidJobName(jobName)) return null
+    return apiClient.updateMyJob(token, jobName, clampLevel(level))
+  })
+
+  ipcMain.handle('friends-send-request', async (_event, friendCode: string) => {
+    const { token } = store.getSession()
+    if (!token) return
+    await apiClient.sendFriendRequest(token, friendCode)
+  })
+
+  ipcMain.handle('friends-pending-requests', async () => {
+    const { token } = store.getSession()
+    if (!token) return []
+    return apiClient.getPendingRequests(token)
+  })
+
+  ipcMain.handle('friends-accept-request', async (_event, id: string) => {
+    const { token } = store.getSession()
+    if (!token) return
+    await apiClient.acceptFriendRequest(token, id)
+  })
+
+  ipcMain.handle('friends-reject-request', async (_event, id: string) => {
+    const { token } = store.getSession()
+    if (!token) return
+    await apiClient.rejectFriendRequest(token, id)
+  })
+
+  ipcMain.handle('friends-list', async () => {
+    const { token } = store.getSession()
+    if (!token) return []
+    return apiClient.getFriends(token)
+  })
+
   watcher.on('wakfu-event', (event) => {
     store.appendHistoryEvent(event)
     getWindow()?.webContents.send('wakfu-event-pushed', event)
@@ -123,6 +210,17 @@ export function registerIpcHandlers(
 
     if (event.type === 'server-connection') {
       notify('Connecté au serveur', event.server)
+    }
+
+    if (event.type === 'job-level-up') {
+      const { token } = store.getSession()
+      if (token) {
+        void apiClient.getMyJobs(token).then((jobs) => {
+          const current = jobs.find((j) => j.jobName === event.jobName)?.level ?? 0
+          const newLevel = clampLevel(current + event.levelsGained)
+          return apiClient.updateMyJob(token, event.jobName, newLevel)
+        })
+      }
     }
   })
 }

@@ -52,7 +52,9 @@ const currentServer = computed(() => {
 const recentEvents = computed(() => store.liveEvents.slice(0, 5))
 
 function dotClass(event: WakfuEvent): string {
-  if (event.type === 'quest-completed' || event.type === 'achievement') return 'event-dot-gold'
+  if (event.type === 'quest-completed' || event.type === 'achievement' || event.type === 'job-level-up') {
+    return 'event-dot-gold'
+  }
   if (event.type === 'quest-failed') return 'event-dot-danger'
   return 'event-dot-accent'
 }
@@ -67,6 +69,8 @@ function describe(event: WakfuEvent): string {
       return `Quête échouée : ${event.questName}`
     case 'achievement':
       return `Haut fait débloqué : #${event.achievementId}`
+    case 'job-level-up':
+      return `${event.jobName} : +${event.levelsGained} niveau${event.levelsGained > 1 ? 'x' : ''}`
   }
 }
 </script>

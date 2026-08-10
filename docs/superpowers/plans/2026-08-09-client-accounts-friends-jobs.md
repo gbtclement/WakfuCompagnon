@@ -90,9 +90,11 @@ tests/
 - `src/main/jobs.ts` exports `JOB_NAMES: readonly string[]`, `isValidJobName(name: string): boolean`,
   `clampLevel(level: number): number` — identical contract to `server/src/jobs.ts`.
 - `src/main/apiClient.ts` exports `ApiError` (class, has `.status: number` and `.message: string`),
-  and `apiClient` object: `register(payload): Promise<AuthResult>`,
-  `login(payload): Promise<AuthResult>`, `getMyJobs(token): Promise<JobEntry[]>`,
-  `updateMyJob(token, jobName, level): Promise<JobEntry>`,
+  `createApiClient(baseUrl, fetchFn?)`, and `getApiClient()` — a lazy accessor returning a
+  singleton client built from `DEFAULT_API_BASE_URL` on first call (not a module-level constant —
+  see Task 6's implementation note on why). The returned client object has:
+  `register(payload): Promise<AuthResult>`, `login(payload): Promise<AuthResult>`,
+  `getMyJobs(token): Promise<JobEntry[]>`, `updateMyJob(token, jobName, level): Promise<JobEntry>`,
   `sendFriendRequest(token, friendCode): Promise<void>`,
   `getPendingRequests(token): Promise<FriendRequest[]>`,
   `acceptFriendRequest(token, id): Promise<void>`, `rejectFriendRequest(token, id): Promise<void>`,
@@ -324,10 +326,24 @@ Expected: PASS
 Run: `npx vitest run tests/parsers`
 Expected: all PASS (existing parsers untouched, new one added).
 
+**Implementation note (fully surfaces at Task 9's renderer typecheck, but caused by this task):**
+adding the `'job-level-up'` variant to `WakfuEvent` breaks exhaustive `switch (event.type)`
+statements in two renderer views that render event history:
+`src/renderer/views/HistoryView.vue` (`typeLabel`/`badgeClass`/`describe` functions) and
+`src/renderer/views/ServerStatusView.vue` (`dotClass`/`describe` functions) — TypeScript's
+switch-without-default exhaustiveness check only flags these once the union actually gains a case
+they don't handle, so this only becomes visible when you run `npx vue-tsc --noEmit -p
+tsconfig.json` (not done as part of this task's own verification, which only checks parsers).
+Fix now rather than deferring: add a `case 'job-level-up':` branch to each function, e.g.
+`typeLabel` → `'Métier'`, `describe` → `` `${event.jobName} : +${event.levelsGained} niveau${event.levelsGained > 1 ? 'x' : ''}` ``,
+and treat it as a "gold" badge/dot alongside `quest-completed`/`achievement` in `badgeClass`/
+`dotClass`. Run `npx vue-tsc --noEmit -p tsconfig.json` before moving on to confirm both files are
+clean.
+
 - [ ] **Step 8: Commit**
 
 ```bash
-git add src/main/parsers/types.ts src/main/parsers/jobLevelUp.ts tests/parsers/fixtures.ts tests/parsers/jobLevelUp.test.ts
+git add src/main/parsers/types.ts src/main/parsers/jobLevelUp.ts tests/parsers/fixtures.ts tests/parsers/jobLevelUp.test.ts src/renderer/views/HistoryView.vue src/renderer/views/ServerStatusView.vue
 git commit -m "client: add job-level-up log parser"
 ```
 
@@ -423,8 +439,12 @@ Expected: FAIL — `src/main/session.ts` does not exist.
 ```typescript
 import { safeStorage } from 'electron'
 
+function encryptionAvailable(): boolean {
+  return typeof safeStorage !== 'undefined' && safeStorage.isEncryptionAvailable()
+}
+
 export function encryptToken(token: string): string {
-  if (safeStorage.isEncryptionAvailable()) {
+  if (encryptionAvailable()) {
     return safeStorage.encryptString(token).toString('base64')
   }
   return Buffer.from(token, 'utf-8').toString('base64')
@@ -432,7 +452,7 @@ export function encryptToken(token: string): string {
 
 export function decryptToken(encrypted: string): string {
   const buffer = Buffer.from(encrypted, 'base64')
-  if (safeStorage.isEncryptionAvailable()) {
+  if (encryptionAvailable()) {
     return safeStorage.decryptString(buffer)
   }
   return buffer.toString('utf-8')
@@ -442,9 +462,16 @@ export function decryptToken(encrypted: string): string {
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run tests/main/session.test.ts`
-Expected: PASS (falls back to base64 under vitest since `safeStorage.isEncryptionAvailable()` is
-false outside a running Electron app — this is expected and fine, the real Electron runtime always
-returns true on supported platforms).
+Expected: PASS.
+
+**Implementation note (discovered during Task 4):** under vitest (plain Node, outside a running
+Electron process), the `electron` module's `safeStorage` export is `undefined`, not an object
+whose `isEncryptionAvailable()` returns `false` — calling `safeStorage.isEncryptionAvailable()`
+directly throws `Cannot read properties of undefined`. Guard with a
+`typeof safeStorage !== 'undefined' && safeStorage.isEncryptionAvailable()` check (see
+`encryptionAvailable()` helper in the code above) so the fallback path is reached instead of
+throwing. The packaged app always runs inside real Electron, where `safeStorage` is defined and
+`isEncryptionAvailable()` reflects real OS-backed encryption support.
 
 - [ ] **Step 5: Commit**
 
@@ -596,10 +623,20 @@ Expected: PASS (all existing tests plus the new one).
 Run: `npx tsc --noEmit -p tsconfig.main.json`
 Expected: no errors.
 
+**Implementation note (fully surfaces at Task 9's renderer typecheck, but caused by this task):**
+adding required fields to `AppConfig` breaks every renderer file that hand-builds a default
+`AppConfig` object inline. Two Pinia stores do this: `src/renderer/stores/appState.ts`'s
+`AppStateShape`'s `config` initial value, and `src/renderer/stores/admin.ts`'s `AdminStateShape`'s
+`config` initial value. Both need `authToken: null, currentUser: null` added to their inline
+object literal, in this same task (don't defer to Task 9 — `npx tsc --noEmit -p
+tsconfig.main.json` above only checks main/preload, not the renderer, so this step's typecheck
+won't catch it; run `npx vue-tsc --noEmit -p tsconfig.json` too before moving on, and fix both
+files if it fails).
+
 - [ ] **Step 7: Commit**
 
 ```bash
-git add src/main/store.ts tests/main/store.test.ts
+git add src/main/store.ts tests/main/store.test.ts src/renderer/stores/appState.ts src/renderer/stores/admin.ts
 git commit -m "client: add encrypted session persistence to AppStore"
 ```
 
@@ -810,7 +847,8 @@ async function request<T>(
   return data as T
 }
 
-export function createApiClient(baseUrl: string, fetchFn: FetchFn = net.fetch) {
+export function createApiClient(baseUrl: string, fetchFn?: FetchFn) {
+  const resolvedFetch = fetchFn ?? net.fetch
   return {
     register(payload: {
       username: string
@@ -818,19 +856,19 @@ export function createApiClient(baseUrl: string, fetchFn: FetchFn = net.fetch) {
       password: string
       jobs: Record<string, number>
     }): Promise<AuthResult> {
-      return request(fetchFn, baseUrl, '/auth/register', { method: 'POST', body: payload })
+      return request(resolvedFetch, baseUrl, '/auth/register', { method: 'POST', body: payload })
     },
 
     login(payload: { usernameOrEmail: string; password: string }): Promise<AuthResult> {
-      return request(fetchFn, baseUrl, '/auth/login', { method: 'POST', body: payload })
+      return request(resolvedFetch, baseUrl, '/auth/login', { method: 'POST', body: payload })
     },
 
     getMyJobs(token: string): Promise<JobEntry[]> {
-      return request(fetchFn, baseUrl, '/me/jobs', { token })
+      return request(resolvedFetch, baseUrl, '/me/jobs', { token })
     },
 
     updateMyJob(token: string, jobName: string, level: number): Promise<JobEntry> {
-      return request(fetchFn, baseUrl, `/me/jobs/${encodeURIComponent(jobName)}`, {
+      return request(resolvedFetch, baseUrl, `/me/jobs/${encodeURIComponent(jobName)}`, {
         method: 'PUT',
         token,
         body: { level }
@@ -838,35 +876,55 @@ export function createApiClient(baseUrl: string, fetchFn: FetchFn = net.fetch) {
     },
 
     sendFriendRequest(token: string, friendCode: string): Promise<void> {
-      return request(fetchFn, baseUrl, '/friends/request', { method: 'POST', token, body: { friendCode } })
+      return request(resolvedFetch, baseUrl, '/friends/request', { method: 'POST', token, body: { friendCode } })
     },
 
     getPendingRequests(token: string): Promise<FriendRequestSummary[]> {
-      return request(fetchFn, baseUrl, '/friends/requests', { token })
+      return request(resolvedFetch, baseUrl, '/friends/requests', { token })
     },
 
     acceptFriendRequest(token: string, id: string): Promise<void> {
-      return request(fetchFn, baseUrl, `/friends/requests/${encodeURIComponent(id)}/accept`, {
+      return request(resolvedFetch, baseUrl, `/friends/requests/${encodeURIComponent(id)}/accept`, {
         method: 'POST',
         token
       })
     },
 
     rejectFriendRequest(token: string, id: string): Promise<void> {
-      return request(fetchFn, baseUrl, `/friends/requests/${encodeURIComponent(id)}/reject`, {
+      return request(resolvedFetch, baseUrl, `/friends/requests/${encodeURIComponent(id)}/reject`, {
         method: 'POST',
         token
       })
     },
 
     getFriends(token: string): Promise<FriendWithJobs[]> {
-      return request(fetchFn, baseUrl, '/friends', { token })
+      return request(resolvedFetch, baseUrl, '/friends', { token })
     }
   }
 }
 
-export const apiClient = createApiClient(DEFAULT_API_BASE_URL)
+let defaultClient: ReturnType<typeof createApiClient> | null = null
+
+export function getApiClient(): ReturnType<typeof createApiClient> {
+  if (!defaultClient) {
+    defaultClient = createApiClient(DEFAULT_API_BASE_URL)
+  }
+  return defaultClient
+}
 ```
+
+**Implementation note (discovered during Task 6):** the module-level default parameter
+`fetchFn: FetchFn = net.fetch` evaluates `net.fetch` unconditionally whenever `createApiClient`
+is called with a single argument — including at module load time, if a top-level
+`export const apiClient = createApiClient(DEFAULT_API_BASE_URL)` were used. Under vitest (plain
+Node), `net` is `undefined`, so accessing `net.fetch` throws `Cannot read properties of undefined`
+immediately on import — before any test even runs. Fixed by making `fetchFn` an optional parameter
+resolved inside the function body (`const resolvedFetch = fetchFn ?? net.fetch`, only evaluated
+when `createApiClient` actually runs) and replacing the eager module-level `apiClient` export with
+a lazy `getApiClient()` accessor that constructs the default client on first real call — this
+keeps `net.fetch` untouched at import time, only touched when a caller inside the running Electron
+main process actually invokes the client. Task 7 must call `getApiClient()` instead of importing a
+bare `apiClient` constant.
 
 - [ ] **Step 4: Run test to verify it passes**
 
@@ -893,7 +951,7 @@ git commit -m "client: add backend API client with injectable fetch for testing"
 - Modify: `src/main/ipc.ts`
 
 **Interfaces:**
-- Consumes: `apiClient` (Task 6), `AppStore.setSession`/`getSession` (Task 5), `isValidJobName`/
+- Consumes: `getApiClient()` (Task 6), `AppStore.setSession`/`getSession` (Task 5), `isValidJobName`/
   `clampLevel` (Task 1).
 - Produces: IPC channels `auth-register`, `auth-login`, `auth-logout`, `auth-get-session`,
   `friends-send-request`, `friends-accept-request`, `friends-reject-request`, `friends-list`,
@@ -914,7 +972,7 @@ triggered from buttons/background sync rather than a form needing inline validat
 Add imports at the top:
 
 ```typescript
-import { apiClient, ApiError } from './apiClient'
+import { getApiClient, ApiError } from './apiClient'
 import { isValidJobName, clampLevel } from './jobs'
 ```
 
@@ -922,6 +980,8 @@ Add these handlers inside `registerIpcHandlers`, after the existing `remove-expl
 before the `watcher.on('wakfu-event', ...)` block:
 
 ```typescript
+  const apiClient = getApiClient()
+
   ipcMain.handle(
     'auth-register',
     async (

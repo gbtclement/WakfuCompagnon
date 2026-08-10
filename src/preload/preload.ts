@@ -37,7 +37,33 @@ const api = {
   updateExploit: (id: string, name: string, questIds: string[], archimonsterIds: string[]): Promise<AppConfig> =>
     ipcRenderer.invoke('update-exploit', id, name, questIds, archimonsterIds),
   removeExploit: (id: string): Promise<AppConfig> =>
-    ipcRenderer.invoke('remove-exploit', id)
+    ipcRenderer.invoke('remove-exploit', id),
+  authRegister: (payload: {
+    username: string
+    email: string
+    password: string
+    jobs: Record<string, number>
+  }): Promise<{ user: { username: string; friendCode: string } } | { error: string }> =>
+    ipcRenderer.invoke('auth-register', payload),
+  authLogin: (payload: {
+    usernameOrEmail: string
+    password: string
+  }): Promise<{ user: { username: string; friendCode: string } } | { error: string }> =>
+    ipcRenderer.invoke('auth-login', payload),
+  authLogout: (): Promise<void> => ipcRenderer.invoke('auth-logout'),
+  authGetSession: (): Promise<{ username: string; friendCode: string } | null> =>
+    ipcRenderer.invoke('auth-get-session'),
+  getMyJobs: (): Promise<{ jobName: string; level: number }[]> => ipcRenderer.invoke('job-get-mine'),
+  updateJobManual: (jobName: string, level: number): Promise<{ jobName: string; level: number } | null> =>
+    ipcRenderer.invoke('job-update-manual', jobName, level),
+  sendFriendRequest: (friendCode: string): Promise<void> =>
+    ipcRenderer.invoke('friends-send-request', friendCode),
+  getPendingFriendRequests: (): Promise<{ id: string; fromUsername: string }[]> =>
+    ipcRenderer.invoke('friends-pending-requests'),
+  acceptFriendRequest: (id: string): Promise<void> => ipcRenderer.invoke('friends-accept-request', id),
+  rejectFriendRequest: (id: string): Promise<void> => ipcRenderer.invoke('friends-reject-request', id),
+  getFriends: (): Promise<{ username: string; jobs: { jobName: string; level: number }[] }[]> =>
+    ipcRenderer.invoke('friends-list')
 }
 
 export type WakfuApi = typeof api

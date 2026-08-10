@@ -17,7 +17,9 @@ export const useAppStore = defineStore('app', {
       history: [],
       environmentalQuests: [],
       archimonsters: [],
-      exploits: []
+      exploits: [],
+      authToken: null,
+      currentUser: null
     },
     liveEvents: []
   }),
