@@ -18,12 +18,15 @@ import ToastStack from './components/ToastStack.vue'
 import UpdateBadge from './components/UpdateBadge.vue'
 import { useAppStore } from './stores/appState'
 import { useAdminStore } from './stores/admin'
+import { useAuthStore } from './stores/auth'
 
 const store = useAppStore()
 const adminStore = useAdminStore()
+const authStore = useAuthStore()
 onMounted(() => {
   store.load()
   adminStore.load()
+  authStore.load()
 })
 </script>
 
