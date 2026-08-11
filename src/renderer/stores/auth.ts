@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 interface AuthUser {
   username: string
   friendCode: string
+  role: 'player' | 'admin'
 }
 
 interface AuthStateShape {
@@ -17,6 +18,9 @@ export const useAuthStore = defineStore('auth', {
     user: null,
     errorMessage: null
   }),
+  getters: {
+    isAdmin: (state): boolean => state.user?.role === 'admin'
+  },
   actions: {
     async load(): Promise<void> {
       const user = await window.wakfuApi.authGetSession()
