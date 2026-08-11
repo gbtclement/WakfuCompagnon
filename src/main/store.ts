@@ -37,7 +37,7 @@ export interface AppConfig {
   archimonsters: Archimonster[]
   exploits: Exploit[]
   authToken: string | null
-  currentUser: { username: string; friendCode: string } | null
+  currentUser: { username: string; friendCode: string; role: 'player' | 'admin' } | null
 }
 
 const DEFAULTS: AppConfig = {
@@ -152,12 +152,12 @@ export class AppStore {
     this.store.set('exploits', this.store.get('exploits').filter((e) => e.id !== id))
   }
 
-  setSession(token: string | null, user: { username: string; friendCode: string } | null): void {
+  setSession(token: string | null, user: { username: string; friendCode: string; role: 'player' | 'admin' } | null): void {
     this.store.set('authToken', token ? encryptToken(token) : null)
     this.store.set('currentUser', user)
   }
 
-  getSession(): { token: string | null; user: { username: string; friendCode: string } | null } {
+  getSession(): { token: string | null; user: { username: string; friendCode: string; role: 'player' | 'admin' } | null } {
     const encrypted = this.store.get('authToken')
     return {
       token: encrypted ? decryptToken(encrypted) : null,

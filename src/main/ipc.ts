@@ -125,8 +125,9 @@ export function registerIpcHandlers(
       )
       try {
         const result = await apiClient.register({ ...payload, jobs: clampedJobs })
-        store.setSession(result.token, { username: result.user.username, friendCode: result.user.friendCode })
-        return { user: { username: result.user.username, friendCode: result.user.friendCode } }
+        const user = { username: result.user.username, friendCode: result.user.friendCode, role: result.user.role as 'player' | 'admin' }
+        store.setSession(result.token, user)
+        return { user }
       } catch (err) {
         return { error: err instanceof ApiError ? err.message : 'Erreur réseau' }
       }
@@ -136,8 +137,9 @@ export function registerIpcHandlers(
   ipcMain.handle('auth-login', async (_event, payload: { usernameOrEmail: string; password: string }) => {
     try {
       const result = await apiClient.login(payload)
-      store.setSession(result.token, { username: result.user.username, friendCode: result.user.friendCode })
-      return { user: { username: result.user.username, friendCode: result.user.friendCode } }
+      const user = { username: result.user.username, friendCode: result.user.friendCode, role: result.user.role as 'player' | 'admin' }
+      store.setSession(result.token, user)
+      return { user }
     } catch (err) {
       return { error: err instanceof ApiError ? err.message : 'Erreur réseau' }
     }
@@ -192,6 +194,31 @@ export function registerIpcHandlers(
     const { token } = store.getSession()
     if (!token) return []
     return apiClient.getFriends(token)
+  })
+
+  ipcMain.handle('admin-list-users', async () => {
+    const { token } = store.getSession()
+    if (!token) return []
+    return apiClient.getAdminUsers(token)
+  })
+
+  ipcMain.handle(
+    'admin-update-user',
+    async (
+      _event,
+      id: string,
+      payload: { username?: string; email?: string; jobs?: Record<string, number> }
+    ) => {
+      const { token } = store.getSession()
+      if (!token) return
+      await apiClient.updateAdminUser(token, id, payload)
+    }
+  )
+
+  ipcMain.handle('admin-delete-user', async (_event, id: string) => {
+    const { token } = store.getSession()
+    if (!token) return
+    await apiClient.deleteAdminUser(token, id)
   })
 
   watcher.on('wakfu-event', (event) => {

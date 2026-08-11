@@ -41,15 +41,15 @@ const api = {
     email: string
     password: string
     jobs: Record<string, number>
-  }): Promise<{ user: { username: string; friendCode: string } } | { error: string }> =>
+  }): Promise<{ user: { username: string; friendCode: string; role: 'player' | 'admin' } } | { error: string }> =>
     ipcRenderer.invoke('auth-register', payload),
   authLogin: (payload: {
     usernameOrEmail: string
     password: string
-  }): Promise<{ user: { username: string; friendCode: string } } | { error: string }> =>
+  }): Promise<{ user: { username: string; friendCode: string; role: 'player' | 'admin' } } | { error: string }> =>
     ipcRenderer.invoke('auth-login', payload),
   authLogout: (): Promise<void> => ipcRenderer.invoke('auth-logout'),
-  authGetSession: (): Promise<{ username: string; friendCode: string } | null> =>
+  authGetSession: (): Promise<{ username: string; friendCode: string; role: 'player' | 'admin' } | null> =>
     ipcRenderer.invoke('auth-get-session'),
   getMyJobs: (): Promise<{ jobName: string; level: number }[]> => ipcRenderer.invoke('job-get-mine'),
   updateJobManual: (jobName: string, level: number): Promise<{ jobName: string; level: number } | null> =>
@@ -62,6 +62,14 @@ const api = {
   rejectFriendRequest: (id: string): Promise<void> => ipcRenderer.invoke('friends-reject-request', id),
   getFriends: (): Promise<{ username: string; jobs: { jobName: string; level: number }[] }[]> =>
     ipcRenderer.invoke('friends-list'),
+  adminListUsers: (): Promise<
+    { id: string; username: string; email: string; role: string; createdAt: string; jobs: { jobName: string; level: number }[] }[]
+  > => ipcRenderer.invoke('admin-list-users'),
+  adminUpdateUser: (
+    id: string,
+    payload: { username?: string; email?: string; jobs?: Record<string, number> }
+  ): Promise<void> => ipcRenderer.invoke('admin-update-user', id, payload),
+  adminDeleteUser: (id: string): Promise<void> => ipcRenderer.invoke('admin-delete-user', id),
   downloadUpdate: (): Promise<void> => ipcRenderer.invoke('update-download'),
   onUpdateAvailable: (callback: (info: { version: string }) => void): void => {
     ipcRenderer.on('update-available-pushed', (_event, payload: { version: string }) => callback(payload))
