@@ -60,6 +60,22 @@ describe('POST /auth/register', () => {
 
     expect(response.statusCode).toBe(400);
   });
+
+  it('register returns role "player" for a new account', async () => {
+    const app = buildApp();
+    const response = await app.inject({
+      method: 'POST',
+      url: '/auth/register',
+      payload: {
+        username: 'roletest',
+        email: 'roletest@example.com',
+        password: 'hunter2hunter2',
+        jobs: {},
+      },
+    });
+
+    expect(response.json().user.role).toBe('player');
+  });
 });
 
 describe('POST /auth/login', () => {
@@ -144,5 +160,27 @@ describe('POST /auth/login', () => {
 
     expect(response.statusCode).toBe(200);
     expect(response.json().user.username).toBe('attacker@example.com');
+  });
+
+  it('login returns the account role', async () => {
+    const app = buildApp();
+    await app.inject({
+      method: 'POST',
+      url: '/auth/register',
+      payload: {
+        username: 'roletest2',
+        email: 'roletest2@example.com',
+        password: 'hunter2hunter2',
+        jobs: {},
+      },
+    });
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/auth/login',
+      payload: { usernameOrEmail: 'roletest2', password: 'hunter2hunter2' },
+    });
+
+    expect(response.json().user.role).toBe('player');
   });
 });
