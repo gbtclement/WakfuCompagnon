@@ -39,9 +39,9 @@ export async function authPlugin(app: FastifyInstance): Promise<void> {
       const friendCode = generateFriendCode();
 
       const userRows = await client.query(
-        `INSERT INTO users (username, email, password_hash, friend_code)
-         VALUES ($1, $2, $3, $4)
-         RETURNING id, username, friend_code`,
+        `INSERT INTO users (username, email, password_hash, friend_code, role)
+         VALUES ($1, $2, $3, $4, 'player')
+         RETURNING id, username, friend_code, role`,
         [username, email, passwordHash, friendCode]
       );
       const user = userRows.rows[0];
@@ -55,10 +55,10 @@ export async function authPlugin(app: FastifyInstance): Promise<void> {
 
       await client.query('COMMIT');
 
-      const token = app.jwt.sign({ userId: user.id }, { expiresIn: '30d' });
+      const token = app.jwt.sign({ userId: user.id, role: user.role }, { expiresIn: '30d' });
       return reply.code(201).send({
         token,
-        user: { id: user.id, username: user.username, friendCode: user.friend_code },
+        user: { id: user.id, username: user.username, friendCode: user.friend_code, role: user.role },
       });
     } catch (err) {
       await client.query('ROLLBACK');
@@ -79,10 +79,10 @@ export async function authPlugin(app: FastifyInstance): Promise<void> {
     const { usernameOrEmail, password } = parsed.data;
 
     const rows = await pool.query(
-      `SELECT id, username, friend_code, password_hash FROM users
+      `SELECT id, username, friend_code, password_hash, role FROM users
        WHERE username = $1
        UNION ALL
-       SELECT id, username, friend_code, password_hash FROM users
+       SELECT id, username, friend_code, password_hash, role FROM users
        WHERE email = $1
        LIMIT 1`,
       [usernameOrEmail]
@@ -92,10 +92,10 @@ export async function authPlugin(app: FastifyInstance): Promise<void> {
       return reply.code(401).send({ error: 'Invalid credentials' });
     }
 
-    const token = app.jwt.sign({ userId: user.id }, { expiresIn: '30d' });
+    const token = app.jwt.sign({ userId: user.id, role: user.role }, { expiresIn: '30d' });
     return reply.send({
       token,
-      user: { id: user.id, username: user.username, friendCode: user.friend_code },
+      user: { id: user.id, username: user.username, friendCode: user.friend_code, role: user.role },
     });
   });
 }
