@@ -13,7 +13,7 @@ export class ApiError extends Error {
 
 export interface AuthResult {
   token: string
-  user: { id: string; username: string; friendCode: string }
+  user: { id: string; username: string; friendCode: string; role: string }
 }
 
 export interface JobEntry {
@@ -28,6 +28,15 @@ export interface FriendRequestSummary {
 
 export interface FriendWithJobs {
   username: string
+  jobs: JobEntry[]
+}
+
+export interface AdminUserView {
+  id: string
+  username: string
+  email: string
+  role: string
+  createdAt: string
   jobs: JobEntry[]
 }
 
@@ -107,6 +116,29 @@ export function createApiClient(baseUrl: string, fetchFn?: FetchFn) {
 
     getFriends(token: string): Promise<FriendWithJobs[]> {
       return request(resolvedFetch, baseUrl, '/friends', { token })
+    },
+
+    getAdminUsers(token: string): Promise<AdminUserView[]> {
+      return request(resolvedFetch, baseUrl, '/admin/users', { token })
+    },
+
+    updateAdminUser(
+      token: string,
+      id: string,
+      payload: { username?: string; email?: string; jobs?: Record<string, number> }
+    ): Promise<void> {
+      return request(resolvedFetch, baseUrl, `/admin/users/${encodeURIComponent(id)}`, {
+        method: 'PUT',
+        token,
+        body: payload
+      })
+    },
+
+    deleteAdminUser(token: string, id: string): Promise<void> {
+      return request(resolvedFetch, baseUrl, `/admin/users/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+        token
+      })
     }
   }
 }
