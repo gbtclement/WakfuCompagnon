@@ -3,6 +3,7 @@ import { registerJwt } from './auth/jwt';
 import { authPlugin } from './auth/plugin';
 import { jobsRoutesPlugin } from './jobsRoutes/plugin';
 import { friendsPlugin } from './friends/plugin';
+import { adminPlugin } from './admin/plugin';
 
 export function buildApp(): FastifyInstance {
   const app = Fastify();
@@ -10,5 +11,6 @@ export function buildApp(): FastifyInstance {
   app.register(authPlugin);
   app.register(jobsRoutesPlugin);
   app.register(friendsPlugin);
+  app.register(adminPlugin);
   return app;
 }
