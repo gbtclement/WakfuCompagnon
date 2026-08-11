@@ -107,10 +107,10 @@ describe('AppStore', () => {
   it('stores and retrieves an encrypted session, decrypted on read', () => {
     expect(store.getSession()).toEqual({ token: null, user: null })
 
-    store.setSession('a.fake.jwt', { username: 'clement', friendCode: 'WC-ABCDEF' })
+    store.setSession('a.fake.jwt', { username: 'clement', friendCode: 'WC-ABCDEF', role: 'player' })
     const session = store.getSession()
     expect(session.token).toBe('a.fake.jwt')
-    expect(session.user).toEqual({ username: 'clement', friendCode: 'WC-ABCDEF' })
+    expect(session.user).toEqual({ username: 'clement', friendCode: 'WC-ABCDEF', role: 'player' })
 
     // the raw config field must not be the plaintext token
     expect(store.getConfig().authToken).not.toBe('a.fake.jwt')
