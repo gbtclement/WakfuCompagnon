@@ -25,7 +25,7 @@
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3" /><path d="M12 3.5v2.2M12 18.3v2.2M4.6 7l1.9 1.1M17.5 15.9l1.9 1.1M4.6 17l1.9-1.1M17.5 8.1l1.9-1.1M3.5 12h2.2M18.3 12h2.2" /></svg>
       <span>Paramètres</span>
     </RouterLink>
-    <RouterLink to="/admin" class="nav-link" active-class="nav-link-active">
+    <RouterLink v-if="authStore.isAdmin" to="/admin" class="nav-link" active-class="nav-link-active">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5a1 1 0 0 1 1-1h9l6 6v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1Z" /><path d="M13 4v5h6" /><path d="M8.5 13h7M8.5 16.5h7" /></svg>
       <span>Admin</span>
     </RouterLink>
