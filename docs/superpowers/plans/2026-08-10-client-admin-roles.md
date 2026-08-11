@@ -241,6 +241,12 @@ Add these handlers after the existing `friends-list` handler (before the `watche
 
 - [ ] **Step 4: Add the corresponding methods to `src/main/apiClient.ts`**
 
+**Implementation note (discovered during Task 2):** `apiClient.ts`'s existing `AuthResult`
+interface (`{ token: string; user: { id, username, friendCode } }`) does not include `role`. Step 1
+and Step 2 above read `result.user.role` from `apiClient.register`/`.login`'s return value — add
+`role: string` to `AuthResult.user` first, or the `role: result.user.role as 'player' | 'admin'`
+casts in those steps won't type-check.
+
 This file already exists (from the accounts/friends/jobs client plan). Add these interfaces near
 the existing `FriendWithJobs` interface:
 
