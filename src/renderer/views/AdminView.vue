@@ -60,12 +60,15 @@
         <button type="submit" class="primary-btn">Créer l'exploit</button>
       </form>
     </div>
+
+    <AdminUsersPanel />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useAdminStore } from '../stores/admin'
+import AdminUsersPanel from '../components/AdminUsersPanel.vue'
 
 const admin = useAdminStore()
 
