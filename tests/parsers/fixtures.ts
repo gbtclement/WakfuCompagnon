@@ -16,8 +16,8 @@ export const ACHIEVEMENT_LINES = {
 export const JOB_LEVEL_UP_LINES = {
   trappeurSingleLevel:
     ' INFO 20:04:47,496 [AWT-EventQueue-0] (aPV:174) - [Information (jeu)] Trappeur : +1 041 points d\'XP.  +1 niveau. Prochain niveau dans : 20 796.',
-  bucheronMultiLevel:
-    ' INFO 09:12:03,001 [AWT-EventQueue-0] (aPV:174) - [Information (jeu)] Bûcheron : +12 500 points d\'XP.  +3 niveaux. Prochain niveau dans : 5 200.',
+  mineurMultiLevel:
+    ' INFO 09:12:03,001 [AWT-EventQueue-0] (aPV:174) - [Information (jeu)] Mineur : +12 500 points d\'XP.  +3 niveaux. Prochain niveau dans : 5 200.',
   unknownJob:
     ' INFO 11:00:00,000 [AWT-EventQueue-0] (aPV:174) - [Information (jeu)] Astrologue : +500 points d\'XP.  +1 niveau. Prochain niveau dans : 100.'
 }
