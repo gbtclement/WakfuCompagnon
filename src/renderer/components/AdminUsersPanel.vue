@@ -21,10 +21,25 @@
       <label class="field-label">Email</label>
       <input v-model="editEmail" class="field full-input" type="email" required />
 
-      <div v-for="jobName in JOB_NAMES" :key="jobName" class="job-row">
-        <label class="job-label">{{ jobName }}</label>
+      <h3 class="category-label">Récolte</h3>
+      <div v-for="job in recolteJobs" :key="job.name" class="job-row">
+        <img :src="JOB_ICONS[job.name]" :alt="job.name" class="job-icon" />
+        <label class="job-label">{{ job.name }}</label>
         <input
-          v-model.number="editJobLevels[jobName]"
+          v-model.number="editJobLevels[job.name]"
+          class="field job-input"
+          type="number"
+          min="0"
+          max="155"
+        />
+      </div>
+
+      <h3 class="category-label">Artisanat</h3>
+      <div v-for="job in artisanatJobs" :key="job.name" class="job-row">
+        <img :src="JOB_ICONS[job.name]" :alt="job.name" class="job-icon" />
+        <label class="job-label">{{ job.name }}</label>
+        <input
+          v-model.number="editJobLevels[job.name]"
           class="field job-input"
           type="number"
           min="0"
@@ -41,24 +56,13 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useAdminUsersStore, type AdminUserView } from '../stores/adminUsers'
+import { JOBS } from '../../main/jobs'
+import { JOB_ICONS } from '../jobIcons'
 
-const JOB_NAMES = [
-  'Bûcheron',
-  'Mineur',
-  'Trappeur',
-  'Pêcheur',
-  'Paysan',
-  'Alchimiste',
-  'Forgeron',
-  'Bijoutier',
-  'Sculpteur',
-  'Tailleur',
-  'Cordonnier',
-  'Façonneur',
-  'Boulanger'
-] as const
+const recolteJobs = computed(() => JOBS.filter((j) => j.category === 'recolte'))
+const artisanatJobs = computed(() => JOBS.filter((j) => j.category === 'artisanat'))
 
 const store = useAdminUsersStore()
 
@@ -79,9 +83,9 @@ function startEdit(user: AdminUserView): void {
   editingUser.value = user
   editUsername.value = user.username
   editEmail.value = user.email
-  for (const jobName of JOB_NAMES) {
-    const existing = user.jobs.find((j) => j.jobName === jobName)
-    editJobLevels[jobName] = existing?.level ?? 0
+  for (const job of JOBS) {
+    const existing = user.jobs.find((j) => j.jobName === job.name)
+    editJobLevels[job.name] = existing?.level ?? 0
   }
 }
 
@@ -199,6 +203,21 @@ function confirmDelete(user: AdminUserView): void {
 .full-input {
   width: 100%;
   box-sizing: border-box;
+}
+
+.category-label {
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--gold);
+  margin: 18px 0 8px 0;
+}
+
+.job-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 4px;
+  flex-shrink: 0;
 }
 
 .job-row {

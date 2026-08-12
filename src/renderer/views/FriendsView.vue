@@ -29,7 +29,22 @@
 
     <div class="panel">
       <h2 class="h2">Mes métiers</h2>
-      <div v-for="job in friendsStore.myJobs" :key="job.jobName" class="job-row">
+      <h3 class="category-label">Récolte</h3>
+      <div v-for="job in myRecolteJobs" :key="job.jobName" class="job-row">
+        <img :src="JOB_ICONS[job.jobName]" :alt="job.jobName" class="job-icon" />
+        <span class="job-label">{{ job.jobName }}</span>
+        <input
+          class="field job-input"
+          type="number"
+          min="0"
+          max="155"
+          :value="job.level"
+          @change="onManualJobChange(job.jobName, $event)"
+        />
+      </div>
+      <h3 class="category-label">Artisanat</h3>
+      <div v-for="job in myArtisanatJobs" :key="job.jobName" class="job-row">
+        <img :src="JOB_ICONS[job.jobName]" :alt="job.jobName" class="job-icon" />
         <span class="job-label">{{ job.jobName }}</span>
         <input
           class="field job-input"
@@ -47,7 +62,15 @@
       <p v-if="friendsStore.friends.length === 0" class="subtitle">Aucun ami pour le moment.</p>
       <div v-for="friend in friendsStore.friends" :key="friend.username" class="friend-block">
         <h3 class="friend-name">{{ friend.username }}</h3>
-        <div v-for="job in friend.jobs" :key="job.jobName" class="job-row">
+        <h4 class="category-label">Récolte</h4>
+        <div v-for="job in jobsByCategory(friend.jobs, 'recolte')" :key="job.jobName" class="job-row">
+          <img :src="JOB_ICONS[job.jobName]" :alt="job.jobName" class="job-icon" />
+          <span class="job-label">{{ job.jobName }}</span>
+          <span class="job-value">{{ job.level }}</span>
+        </div>
+        <h4 class="category-label">Artisanat</h4>
+        <div v-for="job in jobsByCategory(friend.jobs, 'artisanat')" :key="job.jobName" class="job-row">
+          <img :src="JOB_ICONS[job.jobName]" :alt="job.jobName" class="job-icon" />
           <span class="job-label">{{ job.jobName }}</span>
           <span class="job-value">{{ job.level }}</span>
         </div>
@@ -57,15 +80,29 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useAuthStore } from '../stores/auth'
 import { useFriendsStore } from '../stores/friends'
+import { JOBS, type JobCategory } from '../../main/jobs'
+import { JOB_ICONS } from '../jobIcons'
 
 const authStore = useAuthStore()
 const friendsStore = useFriendsStore()
 
 const friendCodeInput = ref('')
 const sendError = ref<string | null>(null)
+
+const categoryByJobName = new Map(JOBS.map((job) => [job.name, job.category]))
+
+function jobsByCategory(
+  jobs: { jobName: string; level: number }[],
+  category: JobCategory
+): { jobName: string; level: number }[] {
+  return jobs.filter((job) => categoryByJobName.get(job.jobName) === category)
+}
+
+const myRecolteJobs = computed(() => jobsByCategory(friendsStore.myJobs, 'recolte'))
+const myArtisanatJobs = computed(() => jobsByCategory(friendsStore.myJobs, 'artisanat'))
 
 onMounted(() => {
   friendsStore.refresh()
@@ -182,6 +219,21 @@ function onManualJobChange(jobName: string, event: Event): void {
 .request-actions {
   display: flex;
   gap: 8px;
+}
+
+.category-label {
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--gold);
+  margin: 14px 0 8px 0;
+}
+
+.job-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 4px;
+  flex-shrink: 0;
 }
 
 .job-row {

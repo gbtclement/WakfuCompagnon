@@ -14,10 +14,10 @@ describe('parseJobLevelUp', () => {
   })
 
   it('extracts a multi-level-up gain', () => {
-    const event = parseJobLevelUp(JOB_LEVEL_UP_LINES.bucheronMultiLevel)
+    const event = parseJobLevelUp(JOB_LEVEL_UP_LINES.mineurMultiLevel)
     expect(event).toEqual({
       type: 'job-level-up',
-      jobName: 'Bûcheron',
+      jobName: 'Mineur',
       levelsGained: 3,
       timestamp: '09:12:03,001'
     })

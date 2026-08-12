@@ -23,10 +23,25 @@
       </form>
 
       <form v-else @submit.prevent="submit">
-        <div v-for="jobName in JOB_NAMES" :key="jobName" class="job-row">
-          <label class="job-label">{{ jobName }}</label>
+        <h3 class="category-label">Récolte</h3>
+        <div v-for="job in recolteJobs" :key="job.name" class="job-row">
+          <img :src="JOB_ICONS[job.name]" :alt="job.name" class="job-icon" />
+          <label class="job-label">{{ job.name }}</label>
           <input
-            v-model.number="jobLevels[jobName]"
+            v-model.number="jobLevels[job.name]"
+            class="field job-input"
+            type="number"
+            min="0"
+            max="155"
+          />
+        </div>
+
+        <h3 class="category-label">Artisanat</h3>
+        <div v-for="job in artisanatJobs" :key="job.name" class="job-row">
+          <img :src="JOB_ICONS[job.name]" :alt="job.name" class="job-icon" />
+          <label class="job-label">{{ job.name }}</label>
+          <input
+            v-model.number="jobLevels[job.name]"
             class="field job-input"
             type="number"
             min="0"
@@ -50,25 +65,11 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
-
-const JOB_NAMES = [
-  'Bûcheron',
-  'Mineur',
-  'Trappeur',
-  'Pêcheur',
-  'Paysan',
-  'Alchimiste',
-  'Forgeron',
-  'Bijoutier',
-  'Sculpteur',
-  'Tailleur',
-  'Cordonnier',
-  'Façonneur',
-  'Boulanger'
-] as const
+import { JOBS } from '../../main/jobs'
+import { JOB_ICONS } from '../jobIcons'
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -81,8 +82,11 @@ const passwordConfirm = ref('')
 const step1Error = ref<string | null>(null)
 const submitting = ref(false)
 
+const recolteJobs = computed(() => JOBS.filter((j) => j.category === 'recolte'))
+const artisanatJobs = computed(() => JOBS.filter((j) => j.category === 'artisanat'))
+
 const jobLevels = reactive<Record<string, number>>(
-  Object.fromEntries(JOB_NAMES.map((name) => [name, 0]))
+  Object.fromEntries(JOBS.map((job) => [job.name, 0]))
 )
 
 function goToStep2(): void {
@@ -161,6 +165,21 @@ async function submit(): Promise<void> {
 .job-input {
   width: 80px;
   text-align: right;
+}
+
+.category-label {
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--gold);
+  margin: 18px 0 8px 0;
+}
+
+.job-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 4px;
+  flex-shrink: 0;
 }
 
 .error-text {
