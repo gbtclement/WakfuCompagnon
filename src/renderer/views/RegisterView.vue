@@ -25,8 +25,10 @@
       <form v-else @submit.prevent="submit">
         <h3 class="category-label">Récolte</h3>
         <div v-for="job in recolteJobs" :key="job.name" class="job-row">
-          <img :src="JOB_ICONS[job.name]" :alt="job.name" class="job-icon" />
-          <label class="job-label">{{ job.name }}</label>
+          <div class="job-name">
+            <img :src="JOB_ICONS[job.name]" :alt="job.name" class="job-icon" />
+            <label class="job-label">{{ job.name }}</label>
+          </div>
           <input
             v-model.number="jobLevels[job.name]"
             class="field job-input"
@@ -38,8 +40,10 @@
 
         <h3 class="category-label">Artisanat</h3>
         <div v-for="job in artisanatJobs" :key="job.name" class="job-row">
-          <img :src="JOB_ICONS[job.name]" :alt="job.name" class="job-icon" />
-          <label class="job-label">{{ job.name }}</label>
+          <div class="job-name">
+            <img :src="JOB_ICONS[job.name]" :alt="job.name" class="job-icon" />
+            <label class="job-label">{{ job.name }}</label>
+          </div>
           <input
             v-model.number="jobLevels[job.name]"
             class="field job-input"
@@ -157,6 +161,13 @@ async function submit(): Promise<void> {
   padding: 6px 0;
 }
 
+.job-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
 .job-label {
   font-size: 13.5px;
   color: var(--text-primary);
@@ -176,9 +187,9 @@ async function submit(): Promise<void> {
 }
 
 .job-icon {
-  width: 26px;
-  height: 26px;
-  border-radius: 4px;
+  width: 50px;
+  height: 50px;
+  border-radius: 6px;
   flex-shrink: 0;
 }
 

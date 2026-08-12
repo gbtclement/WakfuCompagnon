@@ -23,8 +23,10 @@
 
       <h3 class="category-label">Récolte</h3>
       <div v-for="job in recolteJobs" :key="job.name" class="job-row">
-        <img :src="JOB_ICONS[job.name]" :alt="job.name" class="job-icon" />
-        <label class="job-label">{{ job.name }}</label>
+        <div class="job-name">
+          <img :src="JOB_ICONS[job.name]" :alt="job.name" class="job-icon" />
+          <label class="job-label">{{ job.name }}</label>
+        </div>
         <input
           v-model.number="editJobLevels[job.name]"
           class="field job-input"
@@ -36,8 +38,10 @@
 
       <h3 class="category-label">Artisanat</h3>
       <div v-for="job in artisanatJobs" :key="job.name" class="job-row">
-        <img :src="JOB_ICONS[job.name]" :alt="job.name" class="job-icon" />
-        <label class="job-label">{{ job.name }}</label>
+        <div class="job-name">
+          <img :src="JOB_ICONS[job.name]" :alt="job.name" class="job-icon" />
+          <label class="job-label">{{ job.name }}</label>
+        </div>
         <input
           v-model.number="editJobLevels[job.name]"
           class="field job-input"
@@ -214,9 +218,9 @@ function confirmDelete(user: AdminUserView): void {
 }
 
 .job-icon {
-  width: 26px;
-  height: 26px;
-  border-radius: 4px;
+  width: 50px;
+  height: 50px;
+  border-radius: 6px;
   flex-shrink: 0;
 }
 
@@ -226,6 +230,13 @@ function confirmDelete(user: AdminUserView): void {
   justify-content: space-between;
   gap: 12px;
   padding: 6px 0;
+}
+
+.job-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
 }
 
 .job-label {

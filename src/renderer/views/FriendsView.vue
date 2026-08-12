@@ -31,8 +31,10 @@
       <h2 class="h2">Mes métiers</h2>
       <h3 class="category-label">Récolte</h3>
       <div v-for="job in myRecolteJobs" :key="job.jobName" class="job-row">
-        <img :src="JOB_ICONS[job.jobName]" :alt="job.jobName" class="job-icon" />
-        <span class="job-label">{{ job.jobName }}</span>
+        <div class="job-name">
+          <img :src="JOB_ICONS[job.jobName]" :alt="job.jobName" class="job-icon" />
+          <span class="job-label">{{ job.jobName }}</span>
+        </div>
         <input
           class="field job-input"
           type="number"
@@ -44,8 +46,10 @@
       </div>
       <h3 class="category-label">Artisanat</h3>
       <div v-for="job in myArtisanatJobs" :key="job.jobName" class="job-row">
-        <img :src="JOB_ICONS[job.jobName]" :alt="job.jobName" class="job-icon" />
-        <span class="job-label">{{ job.jobName }}</span>
+        <div class="job-name">
+          <img :src="JOB_ICONS[job.jobName]" :alt="job.jobName" class="job-icon" />
+          <span class="job-label">{{ job.jobName }}</span>
+        </div>
         <input
           class="field job-input"
           type="number"
@@ -64,14 +68,18 @@
         <h3 class="friend-name">{{ friend.username }}</h3>
         <h4 class="category-label">Récolte</h4>
         <div v-for="job in jobsByCategory(friend.jobs, 'recolte')" :key="job.jobName" class="job-row">
-          <img :src="JOB_ICONS[job.jobName]" :alt="job.jobName" class="job-icon" />
-          <span class="job-label">{{ job.jobName }}</span>
+          <div class="job-name">
+            <img :src="JOB_ICONS[job.jobName]" :alt="job.jobName" class="job-icon" />
+            <span class="job-label">{{ job.jobName }}</span>
+          </div>
           <span class="job-value">{{ job.level }}</span>
         </div>
         <h4 class="category-label">Artisanat</h4>
         <div v-for="job in jobsByCategory(friend.jobs, 'artisanat')" :key="job.jobName" class="job-row">
-          <img :src="JOB_ICONS[job.jobName]" :alt="job.jobName" class="job-icon" />
-          <span class="job-label">{{ job.jobName }}</span>
+          <div class="job-name">
+            <img :src="JOB_ICONS[job.jobName]" :alt="job.jobName" class="job-icon" />
+            <span class="job-label">{{ job.jobName }}</span>
+          </div>
           <span class="job-value">{{ job.level }}</span>
         </div>
       </div>
@@ -92,13 +100,15 @@ const friendsStore = useFriendsStore()
 const friendCodeInput = ref('')
 const sendError = ref<string | null>(null)
 
-const categoryByJobName = new Map(JOBS.map((job) => [job.name, job.category]))
-
 function jobsByCategory(
   jobs: { jobName: string; level: number }[],
   category: JobCategory
 ): { jobName: string; level: number }[] {
-  return jobs.filter((job) => categoryByJobName.get(job.jobName) === category)
+  const levelByName = new Map(jobs.map((j) => [j.jobName, j.level]))
+  return JOBS.filter((job) => job.category === category).map((job) => ({
+    jobName: job.name,
+    level: levelByName.get(job.name) ?? 0
+  }))
 }
 
 const myRecolteJobs = computed(() => jobsByCategory(friendsStore.myJobs, 'recolte'))
@@ -230,9 +240,9 @@ function onManualJobChange(jobName: string, event: Event): void {
 }
 
 .job-icon {
-  width: 26px;
-  height: 26px;
-  border-radius: 4px;
+  width: 50px;
+  height: 50px;
+  border-radius: 6px;
   flex-shrink: 0;
 }
 
@@ -242,6 +252,13 @@ function onManualJobChange(jobName: string, event: Event): void {
   justify-content: space-between;
   gap: 12px;
   padding: 6px 0;
+}
+
+.job-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
 }
 
 .job-label {
