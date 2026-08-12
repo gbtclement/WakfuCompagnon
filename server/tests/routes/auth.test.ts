@@ -16,7 +16,7 @@ describe('POST /auth/register', () => {
         username: 'clement',
         email: 'clement@example.com',
         password: 'hunter2hunter2',
-        jobs: { Trappeur: 42, Bûcheron: 10 },
+        jobs: { Trappeur: 42, Mineur: 10 },
       },
     });
 
